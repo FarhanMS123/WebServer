@@ -40,7 +40,7 @@ module.exports = function(req,res,next,type){
 			}
 		}
 	}else{
-		fullpath = path.resolve("./web/error/404.html");
+		fullpath = path.join(s_exp.get("web"), "error/404.html");
 	}
 	
 	var pathstat = fs.existsSync(fullpath) ? fs.statSync(fullpath) : undefined;
