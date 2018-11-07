@@ -6,13 +6,28 @@ A Full WebServer that could serve plain document, websocket, ejs, nhtml, and nod
   Table of Contents :
   - Application Information
   - index.js configuration
+    - configuring server for the first time
   - plugins.js configuration
-  - Introducing library
+    - Introducing library
+    - begin function
+    - middle function
+      - Working with use function
+    - last function
   - respond.js configuration
+    - Reroute error
+    - Add an extension
+    - Working with type
   - htconfig.js configuration
+    - Similar with respond.js
+    - Working with type
+    - Handle not exist, dissalow or unavailable path.
   - error configuration
   - tmp configuration
   - Introduce websocket file
   - Introduce nodejs file
+  - Introduce ejs file
+  - Introduce nhtml file
   - Parsing with bodyParser plugin
+  -Introducing System Admin
+    -Working with sysadmin for the first time
   - References
