@@ -13,8 +13,11 @@ A Full WebServer that could serve plain document, websocket, ejs, nhtml, and nod
     - middle function
       - Working with use function
     - last function
+    - Make your own plugin
+    - Add plugin to plugin.js
   - respond.js configuration
     - Reroute error
+    - Make your own template
     - Add an extension
     - Working with type
   - htconfig.js configuration
