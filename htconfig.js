@@ -15,7 +15,7 @@ module.exports = function(req,res,next,type){
 	
 	//Main Declaration
 	var fullpath = path.join(s_exp.get("web"), decodeURIComponent(type=="ws" ? url.parse(req.url).pathname : req.path));
-	if(RegExp(`^${path.join(s_exp.get("web"), "tmp")}`).test(fullpath)) fullpath = path.join(s_exp.get("web"), "error/404.html");
+	if(RegExp(`^${path.join(s_exp.get("web"), "tmp")}`).test(fullpath)) fullpath = path.join(s_exp.get("web"), "error/404.njs");
 	
 	if(fs.existsSync(fullpath)){
 		var pathstat = fs.statSync(fullpath);
@@ -35,7 +35,11 @@ module.exports = function(req,res,next,type){
 			}
 		}
 	}else{
-		fullpath = path.join(s_exp.get("web"), "error/404.html");
+		fullpath = path.join(s_exp.get("web"), "error/404.njs");
+	}
+	
+	if(fullpath.toLowerCase().slice(0, path.resolve("./web/tmp").length) == path.resolve("./web/tmp").toLowerCase()){
+		fullpath = path.join(s_exp.get("web"), "error/403.njs")
 	}
 	
 	return fullpath;

@@ -20,7 +20,7 @@
 //Use script below to setting web
 global.listen = {
 	host:"0.0.0.0",
-	port:8080
+	port:process.env.PORT || 8080
 };
 global.web = "./web";
 global.index_file = ["index.html"]

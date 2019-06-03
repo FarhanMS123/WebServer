@@ -40,7 +40,7 @@ module.exports = function(req,res,next,type){
 			}
 		}
 	}else{
-		fullpath = path.join(s_exp.get("web"), "error/404.html");
+		fullpath = path.join(s_exp.get("web"), "error/403.njs");
 	}
 	
 	var pathstat = fs.existsSync(fullpath) ? fs.statSync(fullpath) : undefined;
@@ -72,6 +72,14 @@ module.exports = function(req,res,next,type){
 				removeModule(require.resolve(fullpath), true);
 				require(fullpath)(req,res,next);
 				break;
+			case (path.extname(fullpath).toLowerCase() == ".ejs"):
+				var ejs = require("ejs");
+				var multer = require("multer");
+				var req=req, res=res;
+				multer({dest:"./web/tmp"}).any()(req,res,function(){
+					res.send(ejs.renderFile(fullpath, {main_global:global, req:req, res:res}));
+				});
+				break;
 			default:
 				//res.set("Content-Type", mimeTypes.lookup(fullpath));
 				res.type(fullpath);
@@ -87,7 +95,10 @@ module.exports = function(req,res,next,type){
 			case (path.extname(fullpath).toLowerCase() == ".njs"):
 				removeModule(require.resolve(fullpath), true);
 				var mod = require(fullpath);
-				if(typeof mod=="function") mod.use(req,res,function(){});
+				if(typeof mod.use=="function") mod.use(req,res,function(){});
+				break;
+			case (path.extname(fullpath).toLowerCase() == ".ejs"):
+				
 				break;
 		}
 	}
