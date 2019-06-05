@@ -9,9 +9,13 @@
 */
 
 module.exports = function(req,res,next,type){
+	
 	//Standard Modules
 	var fs = require("fs");
 	var path = require("path");
+	
+	//Extra Modules
+	var mimeTypes = require("mime-types");
 	
 	//Included Functions
 	
@@ -43,9 +47,11 @@ module.exports = function(req,res,next,type){
 		fullpath = path.join(s_exp.get("web"), "error/403.njs");
 	}
 	
+	console.log(type);
+	
 	var pathstat = fs.existsSync(fullpath) ? fs.statSync(fullpath) : undefined;
-	if(type==undefined) console.log(`Respond ${fullpath}`);
 	if(type==undefined){
+		console.log(`Respond ${fullpath}`);
 		switch(true){
 			case (!fs.existsSync(fullpath)):
 				res.status(404);
@@ -81,25 +87,30 @@ module.exports = function(req,res,next,type){
 				});
 				break;
 			default:
-				//res.set("Content-Type", mimeTypes.lookup(fullpath));
-				res.type(fullpath);
+				res.set("Content-Type", mimeTypes.lookup(fullpath));
+				//res.type(fullpath);
 				res.send(fs.readFileSync(fullpath).toString());
+				
 				//res.sendFile(fullpath);
 		}
 	}else if(type=="use"){
+		console.log(`Respond [use] ${fullpath}`);
 		switch(true){
 			case (!fs.existsSync(fullpath)):
 				break;
 			case pathstat.isDirectory():
+				next();
 				break;
 			case (path.extname(fullpath).toLowerCase() == ".njs"):
 				removeModule(require.resolve(fullpath), true);
 				var mod = require(fullpath);
 				if(typeof mod.use=="function") mod.use(req,res,function(){});
 				break;
-			case (path.extname(fullpath).toLowerCase() == ".ejs"):
-				
+			case (path.extname(fullpath).toLowerCase() == ".ejs"): //should be handled
+				next();
 				break;
+			default:
+				next();
 		}
 	}
 }

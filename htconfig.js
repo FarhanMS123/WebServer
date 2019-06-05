@@ -8,6 +8,7 @@ module.exports = function(req,res,next,type){
 	//Standard Module
 	var url=require("url");
 	var path=require("path");
+	var fs=require("fs");
 	
 	//Main Module
 	

@@ -19,6 +19,7 @@ module.exports.begin = function(){
 	process.on("uncaughtException", function(err){
 		console.log("Application Error!");
 		console.log(err);
+		console.log({err});
 	});
 	
 	console.log("Plugin Execute : begin");
@@ -33,7 +34,7 @@ module.exports.middle = function(){
 	//Main Declaration
 	s_exp.use("/*", function(req,res,next){
 		removeModule(require.resolve("./response.js"), true);
-		global.resp_func = require("./response.js")(req,res,function(){},"use");
+		global.resp_func = require("./response.js")(req,res,next,"use");
 	});
 	
 	console.log("Plugin Execute : middle");

@@ -23,7 +23,7 @@ global.listen = {
 	port:process.env.PORT || 8080
 };
 global.web = "./web";
-global.index_file = ["index.html"]
+global.index_file = ["index.html", "default.html"]
 
 //Do not do anything below if you don't know the consequences
 //Standard Module
