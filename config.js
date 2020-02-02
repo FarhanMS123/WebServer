@@ -1,23 +1,32 @@
-var config = {
+var path = require("path");
+
+module.exports = {
 	host: "0.0.0.0",
 	port: process.env.PORT || 8080,
-	web_folder: "./web",
-	tmp_folder: "./web/tmp",
+	web_folder: path.resolve("./web"),
+	tmp_folder: path.resolve("./tmp"),
+	base_url: "/*", 
 	http_error:{
 		"404":"./web/error/404.njs"
 	},
 	routes:{
-		"/web/tmp" : 403 //could be URL<string>, HTTP Status Codes<number>, or function(req,res,next){}
+		"/404" : 403 //could be URL<string>, HTTP Status Codes<number>, or function(req,res,next){}
 	},
 	index_file: ["index.html", "default.html"],
-	plugins:[],
-	middlewares_use: [],
+	plugins:[
+		require("./lib/localip.js"),
+		require("./lib/renderer.js")
+	],
+	middlewares_use: [
+		require("./lib/realpath.js")
+	],
 	middlewares_all: [
-		"/*",
-		require("./lib/realpath.js"),
 		require("./lib/reroutes.js"),
-		require("./lib/HTTPStatusHandler.js")
+		require("./lib/DirectoryPageRenderer"),
+		require("./lib/renderer.js").router
+		//require("./lib/HTTPStatusHandler"), //TODO
+	],
+	renderer : [
+		require("./lib/SimpleFileResponse")
 	]
 }
-
-module.exports = config;

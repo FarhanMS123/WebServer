@@ -15,6 +15,7 @@
 	Each function has 3 arguments, they are global, process, config.
 	You could put plugins as function, or import it via require()
 	module.exports = function(global, process, config){}
+	module.exports = function(main, main_process, config){}
 
 	There are some custom events that emitted from here.
 	From process, you could listen for
@@ -53,6 +54,26 @@ var path = global.path = require("path");
 var express = global.express = require("express");
 process.emit("modluesRequired", fs, path, express); //events
 
+//Functions Added
+function middleware_next(req,res,next){
+    if(typeof next == "function") next();
+}
+function removeModule(main_global, event){
+    main_global.removeModule = function(module_name, includeSubmodule=false){
+        module_name = require.resolve(module_name);
+        if(typeof require.cache[module_name] == "object"){
+            if(includeSubmodule) if(typeof require.cache[module_name].children == "object") if(require.cache[module_name].children.constructor == Array){
+                for(var i=0;i<require.cache[module_name].children.length;i++){
+                    global.removeModule(require.cache[module_name].children[i].id, true);
+                }
+            }
+            delete require.cache[module_name];
+            return true;
+        }
+        return false
+    }
+}
+
 //Main Declaration
 var app = global.app = express();
 process.emit("serverCreated", app);  //events
@@ -62,13 +83,12 @@ app.set("config", config);
 app.emit("configSetted", app.get("config"));  //events
 
 app.emit("setMiddlewares", app); //events
-if(typeof app.get("config").middlewares_use[0] == "function" ||
-   typeof app.get("config").middlewares_use[0] == "function") 
-		app.use.apply(null, app.get("config").middlewares_use);
 
-if(typeof app.get("config").middlewares_all[0] == "function" ||
-   typeof app.get("config").middlewares_all[0] == "function") 
-   		app.all.apply(null, app.get("config").middlewares_all);
+if(app.get("config").middlewares_use.length > 0) 
+	app.use(app.get("config").middlewares_use);
+
+if(app.get("config").middlewares_all.length > 0) 
+	app.all(app.get("config").base_url, app.get("config").middlewares_all);
 
 app.set("listen", app.listen(app.get("config")))
 // https://nodejs.org/dist/latest-v12.x/docs/api/net.html#net_event_listening
@@ -76,4 +96,4 @@ app.set("listen", app.listen(app.get("config")))
 console.log("All plugins loaded");
 
 console.log(`Webserver Active`);
-console.log(listen);
+console.log(app.get("config"));
