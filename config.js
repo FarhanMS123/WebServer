@@ -6,27 +6,32 @@ module.exports = {
 	web_folder: path.resolve("./web"),
 	tmp_folder: path.resolve("./tmp"),
 	base_url: "/*", 
+	DirectoryViewTemplate: path.resolve("./template/DirectoryView.ejs"),
 	http_error:{
-		"404":"./web/error/404.njs"
+		"404": path.resolve("./web/error/404.njs")
 	},
 	routes:{
-		"/404" : 403 //could be URL<string>, HTTP Status Codes<number>, or function(req,res,next){}
+		"/404" : 404 //could be URL<string>, HTTP Status Codes<number>, or function(req,res,next){}
 	},
 	index_file: ["index.html", "default.html"],
 	plugins:[
-		require("./lib/localip.js"),
-		require("./lib/renderer.js")
+		require("./lib/plugin.localip.js"),
+		require("./lib/router.renderer.js"),
+		require("./lib/plugin.WSHandler").plugin
 	],
 	middlewares_use: [
-		require("./lib/realpath.js")
+		require("./lib/router.filepath.js")
 	],
 	middlewares_all: [
-		require("./lib/reroutes.js"),
-		require("./lib/DirectoryPageRenderer"),
-		require("./lib/renderer.js").router
-		//require("./lib/HTTPStatusHandler"), //TODO
+		require("./lib/router.reroutes.js"),
+		require("./lib/router.renderer.js").router,
+		require("./lib/router.HTTPStatusHandler.js")
 	],
-	renderer : [
-		require("./lib/SimpleFileResponse")
+	renderer : [ //dir, njs, ws, ejs, simple
+		require("./lib/renderer.DirectoryPageRenderer.js"),
+		require("./lib/renderer.NJSHandler.js"),
+		require("./lib/plugin.WShandler.js").router,
+		require("./lib/renderer.EJSRenderer.js")({}),
+		require("./lib/renderer.SimpleFileResponse.js")
 	]
 }

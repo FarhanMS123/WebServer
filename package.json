@@ -4,12 +4,14 @@
   "description": "",
   "main": "main.js",
   "scripts": {
-    "start":"node main.js",
-    "test":"node --inpest main.js"
+    "start": "node main.js",
+    "test": "node --inpest main.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.17.1"
+    "ejs": "^3.0.1",
+    "express": "^4.17.1",
+    "ws": "^7.2.1"
   }
 }

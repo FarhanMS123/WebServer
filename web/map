@@ -1,0 +1,68 @@
+index.html
+docs/
+	index.html
+	introducing.html
+test/
+	ws_client.html
+	echo.ws
+	http_status.njs
+	upload.ejs
+	upload/
+		...
+	file_test/
+		pic.png
+		pic.jpg
+		pic.bmp
+		anima.gif
+		audio.wav
+		audio.mp3
+		video.mp4
+		paper.pdf
+		file_test.zip
+		file_test.rar
+	dir_test/
+		...file_test files...
+		lib1/
+			...file_test files...
+			lib1/
+				...file_test files...
+				lib1/
+					lib1/
+						done_here.html
+					lib2/
+						done_here.html
+					lib3/
+						done_here.html
+					lib4/
+						done_here.html
+					lib5/
+						done_here.html
+				lib2/
+					...same...
+				lib3/
+					...same...
+				lib4/
+					...same...
+				lib5/
+					...same...
+			lib2/
+				...same...
+			lib3/
+				...same...
+			lib4/
+				...same...
+			lib5/
+				...same...
+		lib2/
+			...same...
+		lib3/
+			...same...
+		lib4/
+			...same...
+		lib5/
+			...same...
+lib/
+	favicon.png
+	global.css
+	bootstarp/
+		...bootstarp files...

@@ -24,10 +24,11 @@
 		.on("serverCreated", function(app){});
 		included events from
 			NodeJS Process < https://nodejs.org/dist/latest-v12.x/docs/api/process.html#process_process_events >
-	From app, you could listen for :
+	For app, you could listen for :
 		.on("serverCreated", function(app){});
 		.on("configSetted", function(config){});
 		.on("setMiddlewares", function(app){});
+		.on("appListening", function(listen){});
 		emitted Net Server Listen
 		included events from
 			NodeJS HTTP Server < https://nodejs.org/dist/latest-v12.x/docs/api/http.html#http_class_http_server >
@@ -90,7 +91,8 @@ if(app.get("config").middlewares_use.length > 0)
 if(app.get("config").middlewares_all.length > 0) 
 	app.all(app.get("config").base_url, app.get("config").middlewares_all);
 
-app.set("listen", app.listen(app.get("config")))
+app.set("listen", app.listen(app.get("config")));
+app.emit("appListening", app.get("listen"));
 // https://nodejs.org/dist/latest-v12.x/docs/api/net.html#net_event_listening
 
 console.log("All plugins loaded");
