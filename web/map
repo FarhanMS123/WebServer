@@ -1,7 +1,10 @@
 index.html
+error/
+	default.ejs
+dashboard/
+	...dashboard files...
 docs/
-	index.html
-	introducing.html
+	...docs files...
 test/
 	ws_client.html
 	echo.ws
@@ -20,47 +23,24 @@ test/
 		paper.pdf
 		file_test.zip
 		file_test.rar
+		document.docx
+		document.pdf
+		presentation.pptx
+		application.exe
+		application.apk
 	dir_test/
 		...file_test files...
-		lib1/
-			...file_test files...
-			lib1/
-				...file_test files...
-				lib1/
-					lib1/
-						done_here.html
-					lib2/
-						done_here.html
-					lib3/
-						done_here.html
-					lib4/
-						done_here.html
-					lib5/
-						done_here.html
-				lib2/
-					...same...
-				lib3/
-					...same...
-				lib4/
-					...same...
-				lib5/
-					...same...
-			lib2/
-				...same...
-			lib3/
-				...same...
-			lib4/
-				...same...
-			lib5/
-				...same...
-		lib2/
-			...same...
-		lib3/
-			...same...
-		lib4/
-			...same...
-		lib5/
-			...same...
+		dir1/
+			...dir_test's content are copied to here until 3 roots...
+			...end with done_here.html...
+		dir2/
+			...same as dir1...
+		dir3/
+			...same as dir2...
+		dir4/
+			...same as dir3...
+		dir5/
+			...same as dir4...
 lib/
 	favicon.png
 	global.css

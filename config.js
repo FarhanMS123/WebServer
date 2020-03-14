@@ -8,7 +8,7 @@ module.exports = {
 	base_url: "/*", 
 	DirectoryViewTemplate: path.resolve("./template/DirectoryView.ejs"),
 	http_error:{
-		"404": path.resolve("./web/error/404.njs")
+		default: path.resolve("./web/error/default.ejs")
 	},
 	routes:{
 		"/404" : 404 //could be URL<string>, HTTP Status Codes<number>, or function(req,res,next){}
@@ -20,12 +20,13 @@ module.exports = {
 		require("./lib/plugin.WSHandler").plugin
 	],
 	middlewares_use: [
-		require("./lib/router.filepath.js")
+		require("./lib/router.renderer.js").router_res_renderTo
 	],
 	middlewares_all: [
+		require("./lib/router.filepath.js"),
 		require("./lib/router.reroutes.js"),
 		require("./lib/router.renderer.js").router,
-		require("./lib/router.HTTPStatusHandler.js")
+		require("./lib/router.HTTPStatusHandler.js") //TODO
 	],
 	renderer : [ //dir, njs, ws, ejs, simple
 		require("./lib/renderer.DirectoryPageRenderer.js"),
