@@ -1,0 +1,40 @@
+<%
+	var fs = require('fs');
+	var path = require('path');
+
+	var fp = req.renderer ? req.renderer : req.filepath;
+	var fsm = path.join(path.dirname(fp), "statusMessages.json");
+
+	var sm, msg;
+	if(fs.existsSync(fsm)){
+		try{
+			sm = JSON.parse(fs.readFileSync(fsm));
+		}catch(e){
+			//nothing
+		}
+	}
+
+	msg = res.statusMessage ? res.statusMessage : sm[res.statusCode];
+%>
+
+<html>
+    <head>
+		<title><%=res.statusCode%> <%=msg%> HTTP Response</title>
+		<meta http-equiv='X-UA-Compatible' content='IE=edge'>
+ 		<meta name='viewport' content='width=device-width, initial-scale=1'>
+	</head>
+	<body style="background: #eaeaea; text-align:center; font-family:'Segoe UI'; color:rgba(0,0,0,0.9); margin:0px; padding:2em 1em;">
+		<p style="font-size:8em; font-weight:bold; margin:0px; padding:0px; color:#303030"><%=res.statusCode%></p>
+		<p style="font-size:3em; font-weight:bold; margin:0px; padding:0px; color:#303030">
+			<%=msg%>
+		</p>
+		<p style="font-size:1.2em;">
+			It's bad if you're directed to here.<br />
+			It's seems like we have problem in our system. <br />
+			Don't worry! It would be fixed soon. <br />
+			<a href="/">back to home</a> <br />
+			<br />
+			Otherwise, you are expected to coming here ;-)
+		</p>
+	</body>
+</html>

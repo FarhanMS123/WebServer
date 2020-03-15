@@ -11,7 +11,8 @@ module.exports = {
 		default: path.resolve("./web/error/default.ejs")
 	},
 	routes:{
-		"/404" : 404 //could be URL<string>, HTTP Status Codes<number>, or function(req,res,next){}
+		"/404" : 404, //could be URL<string>, HTTP Status Codes<number>, or function(req,res,next){}
+		"/400" : 400
 	},
 	index_file: ["index.html", "default.html"],
 	plugins:[
@@ -26,7 +27,7 @@ module.exports = {
 		require("./lib/router.filepath.js"),
 		require("./lib/router.reroutes.js"),
 		require("./lib/router.renderer.js").router,
-		require("./lib/router.HTTPStatusHandler.js") //TODO
+		require("./lib/router.HTTPStatusHandler.js")
 	],
 	renderer : [ //dir, njs, ws, ejs, simple
 		require("./lib/renderer.DirectoryPageRenderer.js"),
