@@ -9,10 +9,15 @@
 		<meta http-equiv='X-UA-Compatible' content='IE=edge'>
 		<meta name='viewport' content='width=device-width, initial-scale=1'>
 		 
-		<style>tr,td{padding:0.5em;}</style>
+		<style>
+			h1,h3{margin:0px; padding:0px;}
+			tr,td{padding:0.5em;white-space: nowrap;}
+		</style>
 	</head>
 	<body style="margin:0;padding:2em;">
 		<h1>Directory of <%= webpath %></h1>
+		<h3><%# dirpath %></h3>
+		<br /><br />
 		<table>
 			<tr>
 				<th>Filename</th>
@@ -23,7 +28,6 @@
 		<% dirlist.forEach(function(file,index,arr){ %>
 			<tr>
 				<td><a href="<%= file.webpath %>"><%= file.filename %></a></td>
-				<!--<td><a href="<%= file.filename %>"><%= file.filename %></a></td>-->
 				<td><%= file.stat.isDirectory() ? "Directory" : "File" %></td>
 				<td><%= file.stat.size %>B</td>
 				<td><%= new Date(file.stat.mtimeMs).toLocaleString() %></td>

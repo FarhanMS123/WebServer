@@ -1,0 +1,139 @@
+<html>
+	<head>
+		<title>Websocket Test</title>
+		<meta name='viewport' content='width=device-width, initial-scale=1'>
+	</head>
+	<body style="background:#eeeeee; padding: 0.5em; font-family: 'Segoe UI';">
+		<input id="txtUrl" value="/test/echo.ws" style="width:30em; max-width:100%" placeholder="Websocket URL">
+		<div style="margin:0.2em 0em; width:25em; max-width:100%;">
+			<b id="lblStatus" style="background: black; color: white;">Closed</b>
+			<div style="float:right; margin-top: -0.15em;">
+				<button id="btnClear">Clear</button>
+				<button id="btnOpen">Open</button>
+			</div>
+		</div>
+		<textarea id="txtLog" readonly style="width:100%; height:calc(100% - 13.5em); resize:none;"></textarea>
+		<div style="height:8em; margin-top:0.2em;">
+			<textarea id="txtSend" style="width:calc(100% - 5.5em); height:100%; resize:none;" disabled></textarea>
+			<button id="btnSend" style="width: 5em; height: 100%; float: right;" disabled>Send</button>
+		</div>
+
+		<script>
+			txtUrl.value = "ws" + window.location.origin.slice(window.location.origin.indexOf("://")) + txtUrl.value;
+			
+			var ws, tm, rs=-1;
+
+			function createWS(){
+				ws = new WebSocket(txtUrl.value);
+
+				tm = setInterval(function(){
+					if(rs !== ws.readyState){
+						switch(ws.readyState){
+							case 0: //connecting
+								lblStatus.innerText = "Connecting";
+								lblStatus.style.background = "#f1c40f"; //Sun Flower
+								lblStatus.style.color = "#000000";
+
+								txtUrl.setAttribute("disabled", "true");
+								btnOpen.innerText = "Close";
+								txtSend.setAttribute("disabled", "true");
+								btnSend.setAttribute("disabled", "true");
+								break;
+							case 1: //open
+								lblStatus.innerText = "Open";
+								lblStatus.style.background = "#2ecc71"; //Emerald
+								lblStatus.style.color = "#000000";
+								break;
+							case 2: //closing
+								lblStatus.innerText = "Closing";
+								lblStatus.style.background = "#e74c3c"; //Alizarin
+								lblStatus.style.color = "#ffffff";
+
+								txtUrl.setAttribute("disabled", "true");
+								btnOpen.innerText = "Close";
+								txtSend.setAttribute("disabled", "true");
+								btnSend.setAttribute("disabled", "true");
+								break;
+							case 3: //closed
+								lblStatus.innerText = "Closed";
+								lblStatus.style.background = "#000000";
+								lblStatus.style.color = "#ffffff";
+
+								clearInterval(tm);
+								tm=undefined; ws=undefined;
+								rs=-1;
+								break;
+						}
+						rs = ws ? ws.readyState : -1;
+					}
+				}, 1);
+
+				ws.onopen = function(ev){
+					txtUrl.setAttribute("disabled", "true");
+					btnOpen.innerText = "Close";
+					txtSend.removeAttribute("disabled");
+					btnSend.removeAttribute("disabled");
+
+					var autoScroll = false;
+					if(txtLog.scrollTop >= txtLog.scrollHeight - txtLog.clientHeight) autoScroll = true;
+					txtLog.value += `[Websocket Opened : ${ws.url}]\n${new Date().toString()}\n\n`;
+					if(autoScroll) txtLog.scrollTo(txtLog.scrollLeft, txtLog.scrollHeight - txtLog.clientHeight);
+
+					console.log(["open", ev]);
+				}
+				ws.onerror = function(ev){
+					var autoScroll = false;
+					if(txtLog.scrollTop >= txtLog.scrollHeight - txtLog.clientHeight) autoScroll = true;
+					txtLog.value += `\n[Websocket Error, See Console.]\n\n`;
+					if(autoScroll) txtLog.scrollTo(txtLog.scrollLeft, txtLog.scrollHeight - txtLog.clientHeight);
+
+					console.log(["error", ev]);
+				}
+				ws.onmessage = function(ev){
+					var autoScroll = false;
+					if(txtLog.scrollTop >= txtLog.scrollHeight - txtLog.clientHeight) autoScroll = true;
+					txtLog.value += `[Server] : ${ev.data}\n`;
+					if(autoScroll) txtLog.scrollTo(txtLog.scrollLeft, txtLog.scrollHeight - txtLog.clientHeight);
+
+					console.log(["message", ev]);
+				}
+				ws.onclose = function(ev){
+					txtUrl.removeAttribute("disabled");
+					btnOpen.innerText = "Open";
+					txtSend.setAttribute("disabled", "true");
+					btnSend.setAttribute("disabled", "true");
+
+					var autoScroll = false;
+					if(txtLog.scrollTop >= txtLog.scrollHeight - txtLog.clientHeight) autoScroll = true;
+					txtLog.value += `\n[Websocket Closed]\n${new Date().toString()}\n------------------------------\n\n`;
+					if(autoScroll) txtLog.scrollTo(txtLog.scrollLeft, txtLog.scrollHeight - txtLog.clientHeight);
+
+					console.log(["close", ev]);
+				}
+			}
+
+			btnClear.onclick = function(ev){
+				txtLog.value = "";
+			}
+			btnOpen.onclick = function(ev){
+				if(!ws){
+					createWS();
+				}else{
+					ws.close();
+				}
+			}
+			btnSend.onclick = function(ev){
+				if(ws){
+					ws.send(txtSend.value);
+					
+					var autoScroll = false;
+					if(txtLog.scrollTop >= txtLog.scrollHeight - txtLog.clientHeight) autoScroll = true;
+					txtLog.value += `[Client] : ${txtSend.value}\n`;
+					if(autoScroll) txtLog.scrollTo(txtLog.scrollLeft, txtLog.scrollHeight - txtLog.clientHeight);
+
+					txtSend.value = "";
+				}
+			}
+		</script>
+	</body>
+</html>

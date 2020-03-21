@@ -38,7 +38,21 @@
 
 //Do not change any code below if you don't know the consequences
 //Get Config and Run all plugins
+/*
+var _require = require;
+require = function(){console.log(arguments); return _require.apply(global, arguments);}
+global._require = global.require;
+global.require = function(){console.log(arguments); return global._require.apply(global, arguments);}
+module._require = module.require;
+module.require = function(){console.log(arguments); return module._require.apply(module, arguments);}
+*/
+
 var config = global.config = require("./config.js");
+/**
+ * `base_url` is really bad to used by user and really useless.
+ * 				so for now, its better to deprecated it.
+ */
+if(!Boolean(config.base_url)) config.base_url = "/*"
 
 if(typeof config.plugins[0] == "function") config.plugins.forEach(function(value, index, array){
 	//plugins could get anything from global
@@ -53,7 +67,7 @@ var path = global.path = require("path");
 
 //Main Module
 var express = global.express = require("express");
-process.emit("modluesRequired", fs, path, express); //events
+process.emit("modulesRequired", fs, path, express); //events
 
 //Functions Added
 function middleware_next(req,res,next){
@@ -74,11 +88,16 @@ function removeModule(main_global, event){
         return false
     }
 }
+global.middleware_next = middleware_next;
+global.removeModule = removeModule;
 
 //Main Declaration
 var app = global.app = express();
 process.emit("serverCreated", app);  //events
 app.emit("serverCreated", app); //events
+
+//developper configuration
+app.disable("etag");
 
 app.set("config", config);
 app.emit("configSetted", app.get("config"));  //events

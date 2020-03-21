@@ -1,0 +1,98 @@
+<%
+	config.title = "WebServer Test";
+	config.author = "FarhanMS123";
+	config.author.__proto__.link = "https://github.com/FarhanMS123";
+
+	/* console.log({
+		arguments,
+		__output, __append,
+		escapeFn, include, rethrow,
+		__line, __filename
+	}); */
+	//console.log(__lines);
+	// ./api.njs/yourname/human?message=Hello World!&fullfill=love
+%>
+<% 
+	if(req.query.type == "api_routing"){
+		config.html = `
+			<h1>API Routing with api.njs</h1><br />
+			<span>Put your name and type :</span> <br />
+			<input id="txtName" placeholder="Your Name" value="myname">
+			<input id="txtType" placeholder="Type" value="Human"> <br />
+			<span>Put your message and soul's power :</span> <br />
+			<input id="txtMsg" placeholder="Your Message" value="Hello, World!">
+			<input id="txtFF" placeholder="Filled with..." value="Love and Peace"> <br />
+			<br />
+			<button id="btn1">Request (open in new tab)</button>
+			<script>
+				btn1.onclick = function(ev){
+					window.open("/test/api.njs/" + txtName.value + "/" + txtType.value + "?message=" + txtMsg.value + "&fullfill=" + txtFF.value, "_blank");
+				}
+			</script>
+		`;
+	}else if(req.query.type == "form_gui"){
+		config.html = `
+			<style>p{padding:0px; margin:0px;}</style>
+			<p style="text-align: center; width: 100%;"><b>FORM TEST</b></p>
+			<p>
+				Target handler : <br /> 
+				<input id="rad_ejs" type="radio" name="action" value="?type=upload"><label for="rad_ejs">EJS File (index.ejs?type=upload)</label> <br />
+				<input id="rad_njs" type="radio" name="action" value="/test/api.njs/upload" checked><label for="rad_njs">NJS File (api.njs/upload)</label>
+			</p>
+			<p>
+				Method : 
+				<input id="rad_get" type="radio" name="method" value="GET" checked><label for="rad_get">GET</label>
+				<input id="rad_post" type="radio" name="method" value="POST"><label for="rad_post">POST</label>
+			</p>
+			<p>
+				Encode Type : <br /> 
+				<input id="rad_plain" type="radio" name="enctype" value="text/plain"><label for="rad_plain">text/plain</label> <br />
+				<input id="rad_url" type="radio" name="enctype" value="application/x-www-form-urlencoded" checked><label for="rad_url">application/x-www-form-urlencoded</label><br />
+				<input id="rad_multer" type="radio" name="enctype" value="multipart/form-data"><label for="rad_multer">multipart/form-data</label>
+			</p>
+			<button onclick="setForm()">Set form propertise</button>
+			<br /><br />
+			<form id="theForm" style="background:#eeeeee; padding: 0.5em;" target="_blank">
+				<label for="txt_fname">Full name: </label> <input id="txt_fname" name="fullname"><br />
+				<label for="txt_fname2">Full name: </label> <input id="txt_fname2" name="fullname"><br />
+				<label for="txt_email">E-mail: </label> <input id="txt_email" name="email" type="email"><br />
+				<label for="fileUploader">Upload a file: </label> <input id="fileUploader" name="file" type="file"><br />
+				<label for="txt_comment">Comment: </label><br />
+				<textarea id="txt_comment" name="comment" style="width:100%;"></textarea><br /><br />
+				<input type="submit" name="submit">
+			</form>
+			<script>
+				function getRadioChecked(name){
+					return document.querySelectorAll("input[name=" + name + "]:checked")[0];
+				}
+				function setForm(){
+					theForm.setAttribute("method", getRadioChecked("method").value);
+					theForm.setAttribute("enctype", getRadioChecked("enctype").value);
+					theForm.setAttribute("action", getRadioChecked("action").value);
+				}
+				setForm();
+			</script>
+		`;
+	}else if(req.query.type == "upload"){
+		config.html = JSON.stringify({
+			query: req.query, 
+			files: req.files, 
+			body: req.body, 
+			method: req.method,
+			"content-type": req.headers["content-type"]
+		});
+	}else{
+		config.html = `
+			Here are the list of Test :
+			<ul>
+				<li><a href="./websocket.html">WebSocket Echo (echo.ws)</a></li>
+				<li><a href="?type=api_routing">API and Routing (api.njs)</a></li>
+				<li><a href="?type=form_gui">Form Request (index.ejs & api.njs)</a></li>
+			</ul>
+		`;
+	}
+
+	//config.html += await new Promise(function(res){setTimeout(function(){res("Hello, world!")},10000)});
+	//config.html += "maMamAmaMAmamAMama";
+%>
+<%- include("layout.ejs", config) %>
