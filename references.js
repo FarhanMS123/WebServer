@@ -1,3 +1,4 @@
+// Property that often used
 req.url
 res.finished
 req.app
@@ -7,12 +8,13 @@ res.statusCode
 res.sendStatus
 req.path
 
+// Property that setted by main.js
 global.config;
 process.on("configurated", function(config){});
 global.fs
 global.path
 global.express
-process.on("modulesRequired", function(fs, path, express){});
+process.on("modulesImported", function(fs, path, express){});
 global.middleware_next;
 global.removeModule;
 global.app
@@ -20,9 +22,10 @@ process.on("serverCreated", function(app){});
 app.on("serverCreated", function(app){});
 app.get("config");
 app.on("configSetted", function(config){});
-app.on("setMiddlewares", function(app){});
+app.on("settingMiddlewares", function(app){});
+app.on("middlewaresSetted", function(app){});
 app.get("listen");
-app.on("listen", function(listen){});
+app.on("appListening", function(listen){});
 
 config
 config.ip_addresses

@@ -53,6 +53,8 @@
 			<button onclick="setForm()">Set form propertise</button>
 			<br /><br />
 			<form id="theForm" style="background:#eeeeee; padding: 0.5em;" target="_blank">
+				<label for="txt_type">Type, let this be as default :  </label> <br />
+				<input id="txt_type" type="text" name="type" value="upload"> <br />
 				<label for="txt_fname">Full name: </label> <input id="txt_fname" name="fullname"><br />
 				<label for="txt_fname2">Full name: </label> <input id="txt_fname2" name="fullname"><br />
 				<label for="txt_email">E-mail: </label> <input id="txt_email" name="email" type="email"><br />
@@ -95,4 +97,4 @@
 	//config.html += await new Promise(function(res){setTimeout(function(){res("Hello, world!")},10000)});
 	//config.html += "maMamAmaMAmamAMama";
 %>
-<%- include("layout.ejs", config) %>
+<%- include("layout.ejs", config); %>

@@ -20,14 +20,15 @@
 	There are some custom events that emitted from here.
 	From process, you could listen for
 		.on("configurated", function(config){});
-		.on("modluesRequired", function(fs, path, express){});
+		.on("modluesImported", function(express){});
 		.on("serverCreated", function(app){});
 		included events from
 			NodeJS Process < https://nodejs.org/dist/latest-v12.x/docs/api/process.html#process_process_events >
 	For app, you could listen for :
 		.on("serverCreated", function(app){});
 		.on("configSetted", function(config){});
-		.on("setMiddlewares", function(app){});
+		.on("settingtMiddlewares", function(app){});
+		.on("middlewaresSetted", function(app){});
 		.on("appListening", function(listen){});
 		emitted Net Server Listen
 		included events from
@@ -36,21 +37,15 @@
 			NodeJS Net Server Listen < https://nodejs.org/dist/latest-v12.x/docs/api/net.html#net_event_listening >
 */
 
-//Do not change any code below if you don't know the consequences
-//Get Config and Run all plugins
-/*
-var _require = require;
-require = function(){console.log(arguments); return _require.apply(global, arguments);}
-global._require = global.require;
-global.require = function(){console.log(arguments); return global._require.apply(global, arguments);}
-module._require = module.require;
-module.require = function(){console.log(arguments); return module._require.apply(module, arguments);}
-*/
+// Do not change any code below if you don't know the consequences
+// Get Config and Run all plugins
 
 var config = global.config = require("./config.js");
 /**
- * `base_url` is really bad to used by user and really useless.
- * 				so for now, its better to deprecated it.
+ * `base_url` is really bad to be understand by user and 
+ * 				really useless that would make them did
+ * 				something stupid. so for now, its better 
+ * 				to deprecated it.
  */
 if(!Boolean(config.base_url)) config.base_url = "/*"
 
@@ -61,13 +56,9 @@ if(typeof config.plugins[0] == "function") config.plugins.forEach(function(value
 });
 process.emit("configurated", config); //events
 
-//Standard Module
-var fs = global.fs = require("fs");
-var path = global.path = require("path");
-
 //Main Module
 var express = global.express = require("express");
-process.emit("modulesRequired", fs, path, express); //events
+process.emit("modulesRequired", express); //events
 
 //Functions Added
 function middleware_next(req,res,next){
@@ -102,13 +93,15 @@ app.disable("etag");
 app.set("config", config);
 app.emit("configSetted", app.get("config"));  //events
 
-app.emit("setMiddlewares", app); //events
+app.emit("settingMiddlewares", app); //events
 
 if(app.get("config").middlewares_use.length > 0) 
 	app.use(app.get("config").middlewares_use);
 
 if(app.get("config").middlewares_all.length > 0) 
 	app.all(app.get("config").base_url, app.get("config").middlewares_all);
+
+app.emit("middlewaresSetted", app); //events
 
 app.set("listen", app.listen(app.get("config")));
 app.emit("appListening", app.get("listen"));

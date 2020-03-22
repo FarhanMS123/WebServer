@@ -3,6 +3,7 @@ var path = require("path");
 module.exports = {
 	host: "0.0.0.0",
 	port: process.env.PORT || 8080,
+	// base_url : "/*", //let this be a comment if you don't know what you did
 	web_folder: path.resolve("./web"), // the root folder to being served by server.
 	tmp_folder: path.resolve("./tmp"), // is used to saved junk files such as uploads, 
 									   // renderer file, log file, etc. temporary
@@ -75,14 +76,15 @@ module.exports = {
 		require("./lib/router.reroutes.js"), // this should be placed second from first
 		/*                   You could place some middlewares here                   */
 		require("./lib/router.renderer.js").router, //this should be placed second from last
+		require("./lib/middleware.PostHandler.js").autoDelete,
 		require("./lib/router.HTTPStatusHandler.js"), //this should be placed last
 		require("./lib/router.test_response.js").end
 	],
 	renderer : [ // here is middlewares for rendering process
 		require("./lib/renderer.DirectoryPageRenderer.js"), // this should be placed first
 		require("./lib/renderer.NJSHandler.js"),
-		require("./lib/plugin.WShandler.js").router,
-		require("./lib/renderer.EJSRenderer.js")({async: false, handlePost: true}), //async is not supported right now.
+		require("./lib/plugin.WShandler.js").renderer,
+		require("./lib/renderer.EJSRenderer.js")({async: false, handlePOST: true}), //async is not supported right now.
 		require("./lib/renderer.SimpleFileResponse.js") //this should be placed last
 	]
 }
