@@ -70,6 +70,7 @@ module.exports = {
 	middlewares_use: [ // here is middleware to set some options to req or res property
 		require("./lib/router.test_response.js").start,
 		require("./lib/router.renderer.js").router_res_renderTo
+		/*                   You could place some plugins here                   */
 	],
 	middlewares_all: [ // here is middleware to do main process
 		require("./lib/router.filepath.js"), // this should be placed first
@@ -84,7 +85,12 @@ module.exports = {
 		require("./lib/renderer.DirectoryPageRenderer.js"), // this should be placed first
 		require("./lib/renderer.NJSHandler.js"),
 		require("./lib/plugin.WShandler.js").renderer,
-		require("./lib/renderer.EJSRenderer.js")({async: false, handlePOST: true}), //async is not supported right now.
+		/**
+		 * `async` is something awful. so... if you don't know what you did, let it set to false.
+		 * `handlePOST` is to use POST middlewares such as body-parser or multer.
+		 */
+		require("./lib/renderer.EJSRenderer.js")({async:false, handlePOST:true}),
+		/*                     You could place some renderers here                     */
 		require("./lib/renderer.SimpleFileResponse.js") //this should be placed last
 	]
 }

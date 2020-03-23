@@ -1,16 +1,28 @@
 <%
+	// Some variables you should know : arguments, include, config, __filename
+	// config propertise 			  : req, res, require, main_global, ejs_opt
+	// Only developper may knows      : escapeFn, rethrow, __line
+	// Only machines knows            : __output, __append
+	
+	/** 
+	 * Developper notes,
+	 * This is an experimental use. You shouldn't use it right know.
+	 * 
+	 * ejs(str, data, config); this is really just a ejs.
+	 * ejs(filename, data, config, callback); this is really just a ejs.
+	 * experimental_include(filename, data, opts); filename directory is as same as this file.
+	 * 											   `data` and `opts` are same as main config.
+	 * 											   so don't worry if you let it `{}`. This would
+	 * 											   return both <String> nor <Promise>.
+	 * includeSync(filename, data, opts); this would return <String>
+	 * includeAsync(filename, data, opts); this would return <Promise>
+	 * 
+	 * did `include = includeSync;` to fix problem of async
+	 */
+	
 	config.title = "WebServer Test";
 	config.author = "FarhanMS123";
 	config.author.__proto__.link = "https://github.com/FarhanMS123";
-
-	/* console.log({
-		arguments,
-		__output, __append,
-		escapeFn, include, rethrow,
-		__line, __filename
-	}); */
-	//console.log(__lines);
-	// ./api.njs/yourname/human?message=Hello World!&fullfill=love
 %>
 <% 
 	if(req.query.type == "api_routing"){
@@ -93,8 +105,5 @@
 			</ul>
 		`;
 	}
-
-	//config.html += await new Promise(function(res){setTimeout(function(){res("Hello, world!")},10000)});
-	//config.html += "maMamAmaMAmamAMama";
 %>
-<%- include("layout.ejs", config); %>
+<%- include("layout.ejs"); %>
