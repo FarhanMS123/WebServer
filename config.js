@@ -14,6 +14,7 @@ module.exports = {
 	http_error:{
 		default: path.resolve("./web/error/default.ejs")
 	},
+	exp_static:{},
 	routes:{
 		// "path" : <response>
 		// path represent of url in string type, could be path pattern or regex.
