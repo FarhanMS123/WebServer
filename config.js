@@ -64,7 +64,7 @@ module.exports = {
 	plugins:[
 		require("./lib/plugin.localip.js"),
 		require("./lib/router.renderer.js"),
-		require("./lib/plugin.WSHandler").plugin
+		require("./lib/plugin.WSHandler.js").plugin
 	],
 	// All middlewares below is sorted in an order. Please be really carefull to edit those.
 	middlewares_use: [ // here is middleware to set some options to req or res property
