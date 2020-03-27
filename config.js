@@ -84,7 +84,7 @@ module.exports = {
 	renderer : [ // here is middlewares for rendering process
 		require("./lib/renderer.DirectoryPageRenderer.js"), // this should be placed first
 		require("./lib/renderer.NJSHandler.js"),
-		require("./lib/plugin.WShandler.js").renderer,
+		require("./lib/plugin.WSHandler.js").renderer,
 		/**
 		 * `async` is something awful. so... if you don't know what you did, let it set to false.
 		 * `handlePOST` is to use POST middlewares such as body-parser or multer.
