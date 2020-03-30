@@ -51,7 +51,13 @@ module.exports = {
 		//
 
 		"/404": 404,
-		"/test/api.njs/*": "FILE ./web/test/api.njs"
+		"/test/api.njs/*": "FILE ./web/test/api.njs",
+		"/*/node_modules": "403",
+		"/*/node_modules/*": "403",
+		"/*/node_modules/*": "403",
+		"/*/package.json": "403",
+		"/*/package-lock.json": "403",
+		"/*/.*": "403"
 	},
 	/**
 	 * while user request a directory, server is always 
