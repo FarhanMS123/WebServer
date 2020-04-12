@@ -89,7 +89,8 @@ module.exports = {
 		require("./lib/router.test_response.js").end
 	],
 	renderer : [ // here is middlewares for rendering process
-		require("./lib/renderer.DirectoryPageRenderer.js"), // this should be placed first
+		require("./lib/router.reroutes.js"), // this should be placed first
+		require("./lib/renderer.DirectoryPageRenderer.js"), // this should be placed second
 		require("./lib/renderer.NJSHandler.js"),
 		require("./lib/plugin.WSHandler.js").renderer,
 		/**
