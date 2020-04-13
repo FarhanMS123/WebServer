@@ -32,6 +32,11 @@ config
 config.ip_addresses
 config.ip_addresses.host
 
+// plugin.HTTPS.js
+app.get("https");
+app.get("https_listen");
+app.on("appListening", function(listen){});
+
 // Property that setted by router.renderer.js
 res.renderTo(filename, config={}, callback=function(err){});
 res._next_router

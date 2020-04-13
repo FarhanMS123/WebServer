@@ -3,6 +3,12 @@ var path = require("path");
 module.exports = {
 	host: "0.0.0.0",
 	port: process.env.PORT || 8080,
+	https:{
+		passphrase: "20200413_WebServer_20200413_By_20200413_FarhanMS123_20200413",
+		key: fs.readFileSync('ssl_cert/key.pem'),
+		cert: fs.readFileSync('ssl_cert/cert.pem'),
+		port: 443
+	},
 	// base_url : "/*", //let this be a comment if you don't know what you did
 	web_folder: path.resolve("./web"), // the root folder to being served by server.
 	tmp_folder: path.resolve("./tmp"), // is used to saved junk files such as uploads, 
@@ -71,6 +77,7 @@ module.exports = {
 	plugins:[
 		require("./lib/plugin.localip.js"),
 		require("./lib/router.renderer.js"),
+		require("./lib/plugin.HTTPS.js"),
 		require("./lib/plugin.WSHandler.js").plugin
 	],
 	// All middlewares below is sorted in an order. Please be really carefull to edit those.
