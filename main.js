@@ -38,8 +38,12 @@
 */
 
 // Do not change any code below if you don't know the consequences
-// Get Config and Run all plugins
+//process error handling
+process.on('uncaughtException', function(err){
+	console.log([err]);
+});
 
+// Get Config and Run all plugins
 var config = global.config = require("./config.js");
 /**
  * `base_url` is really bad to be understand by user and 
