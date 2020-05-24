@@ -75,7 +75,8 @@ module.exports = config = {
 	 * directory.
 	 */
 	index_file: ["index.html", "default.html", "index.ejs"],
-	
+
+	// Please don't remove or add item from these propertises
 	plugins:[],
 	middlewares_use: [],
 	middlewares_all: [],
