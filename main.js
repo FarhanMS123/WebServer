@@ -1,7 +1,7 @@
 /*
-	Title 	    : Webserver V2.0.0
+	Title 	    : Webserver V2.1.0
 	Author	    : FarhanMS123
-	Version	    : 2.0.0
+	Version	    : 2.1.0
 	Date	    : 2018/10/19
 	Repos	    : https://github.com/FarhanMS123/.
 	Modules	    : express, multer
