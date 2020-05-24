@@ -1,4 +1,7 @@
 # WebServer
+
+![status failed](https://img.shields.io/badge/status-failed-red)
+
 WebServer in NodeJS with ExpressJS.
 
 ## Installation
