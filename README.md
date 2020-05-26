@@ -1,6 +1,6 @@
 # WebServer
 
-![status failed](https://img.shields.io/badge/status-failed-red)
+![status unstable](https://img.shields.io/badge/status-unstable-yellow)
 
 WebServer in NodeJS with ExpressJS.
 
