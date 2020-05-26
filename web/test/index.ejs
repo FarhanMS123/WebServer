@@ -1,5 +1,5 @@
 <%
-	// Some variables you should know : arguments, include, config, __filename
+	// Some variables you should know : arguments, include, __filename
 	// config propertise 			  : req, res, require, main_global, ejs_opt
 	// Only developper may knows      : escapeFn, rethrow, __line
 	// Only machines knows            : __output, __append
@@ -20,13 +20,13 @@
 	 * did `include = includeSync;` to fix problem of async
 	 */
 	
-	config.title = "WebServer Test";
-	config.author = "FarhanMS123";
-	config.author.__proto__.link = "https://github.com/FarhanMS123";
+	_locals.title = "WebServer Test";
+	_locals.author = "FarhanMS123";
+	_locals.author.__proto__.link = "https://github.com/FarhanMS123";
 %>
 <% 
 	if(req.query.type == "api_routing"){
-		config.html = `
+		_locals.html = `
 			<h1>API Routing with api.njs</h1><br />
 			<span>Put your name and type :</span> <br />
 			<input id="txtName" placeholder="Your Name" value="myname">
@@ -43,7 +43,7 @@
 			</script>
 		`;
 	}else if(req.query.type == "form_gui"){
-		config.html = `
+		_locals.html = `
 			<style>p{padding:0px; margin:0px;}</style>
 			<p style="text-align: center; width: 100%;"><b>FORM TEST</b></p>
 			<p>
@@ -88,15 +88,17 @@
 			</script>
 		`;
 	}else if(req.query.type == "upload"){
-		config.html = JSON.stringify({
+		var util = require("util");
+		var obj = {
 			query: req.query, 
 			files: req.files, 
 			body: req.body, 
 			method: req.method,
 			"content-type": req.headers["content-type"]
-		});
+		}
+		_locals.html = `<pre style='width:100%; overflow:auto;'>${util.inspect(obj, {})}</pre>`;
 	}else{
-		config.html = `
+		_locals.html = `
 			Here are the list of Test :
 			<ul>
 				<li><a href="./websocket.html">WebSocket Echo (echo.ws)</a></li>

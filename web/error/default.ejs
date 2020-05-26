@@ -2,8 +2,8 @@
 	var fs = require('fs');
 	var path = require('path');
 
-	var fp = req.renderer ? req.renderer : req.filepath;
-	var fsm = path.join(path.dirname(fp), "statusMessages.json");
+	//var fp = req.renderer ? req.renderer : req.filepath;
+	var fsm = path.join(path.dirname(renderpath), "statusMessages.json");
 
 	var sm, msg;
 	if(fs.existsSync(fsm)){
@@ -13,8 +13,11 @@
 			//nothing
 		}
 	}
-
-	msg = res.statusMessage ? res.statusMessage : sm[res.statusCode];
+	//console.log(arguments);
+	var err = err || {}
+	var message = message || "";
+	var statusCode = err.statusCode || res.statusCode;
+	msg = message || err.message || sm[err.statusCode] || res.statusMessage || sm[res.statusCode];
 %>
 
 <html>
@@ -24,10 +27,13 @@
  		<meta name='viewport' content='width=device-width, initial-scale=1'>
 	</head>
 	<body style="background: #eaeaea; text-align:center; font-family:'Segoe UI'; color:rgba(0,0,0,0.9); margin:0px; padding:2em 1em;">
-		<p style="font-size:8em; font-weight:bold; margin:0px; padding:0px; color:#303030"><%=res.statusCode%></p>
+		<p style="font-size:8em; font-weight:bold; margin:0px; padding:0px; color:#303030"><%=statusCode%></p>
 		<p style="font-size:3em; font-weight:bold; margin:0px; padding:0px; color:#303030">
 			<%=msg%>
 		</p>
+		<% if(Object.keys(err).length > 0){ %>
+			<pre style="text-align:left; background:#222; color:white; padding:1em; max-width:60em; overflow:auto; display: inline-block;"><%=err.stack%></pre>
+		<% }else{ %>
 		<p style="font-size:1.2em;">
 			It's bad if you're directed to here.<br />
 			It's seems like we have problem in our system. <br />
@@ -36,5 +42,6 @@
 			<br />
 			Otherwise, you are expected to coming here ;-)
 		</p>
+		<% } %>
 	</body>
 </html>

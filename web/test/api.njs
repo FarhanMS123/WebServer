@@ -1,6 +1,7 @@
+var path = require("path");
 var express = require("express");
 
-var PostHandler =  require("../../lib/middleware.PostHandler.js");
+var PostHandler =  require(path.resolve(global.app.get("router"), "middleware.PostHandler.js"));
 
 var router = express.Router();
 router.all("/*/api.njs/:name/:type", function(req,res,next){
@@ -22,4 +23,9 @@ router.all("/*/api.njs/:name/:type", function(req,res,next){
 	next();
 });
 
-module.exports = router;
+module.exports = function(path, opts, cb){
+	// NJS is using express engine
+	// opts = {app, req, res, views, render_opts, render_cb, _locals, settings};
+
+	router(opts.req, opts.res, opts.next);
+};

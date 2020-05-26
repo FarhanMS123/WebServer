@@ -105,8 +105,9 @@ dist/
 .dynamodb/
 
 # Temporary folders
-tmp/
+tmp/*
 temp/
+!tmp/flag.txt
 
 ### VisualStudioCode ###
 .vscode/*

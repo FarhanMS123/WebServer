@@ -19,7 +19,7 @@ module.exports = function(req, res, next){
 	//Main Script
 	if(multerMW == false){
 		multerMW = multer({
-			dest: path.resolve(req.app.get("config").tmp_folder)
+			dest: path.resolve(req.app.get("tmp_folder"))
 		}).any();
 		function fileHandler(req,res,next){
 			for(file_index in req.files){

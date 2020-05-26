@@ -1,8 +1,8 @@
 <% 
-	var author = author ? author : "undefined"; 
+	_locals.author = _locals.author ? _locals.author : "undefined"; 
 %>
 <div id="footer" style="background:#e74c3c; color:white;padding: 0.5em; width:calc(100% - 1em); font-family: 'segoe ui'; text-align: center;";">
-	Created by <a style="color:white; font-weight: bold;" href="<%=author.__proto__.link%>"><%= author %></a>
+	Created by <a style="color:white; font-weight: bold;" href="<%=_locals.author.__proto__.link%>"><%= _locals.author %></a>
 </div>
 <script>
 	var body = document.getElementsByTagName("body")[0].clientHeight;
