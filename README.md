@@ -1,4 +1,7 @@
 # WebServer
+
+MASTER AND THIS BRANCH HAS DIFFERENT HISTORY
+
 ![status stable](https://img.shields.io/badge/status-stable-green)
 
 A Full WebServer that could serve plain document, websocket, ejs, nhtml, and nodejs script (njs). <br />
