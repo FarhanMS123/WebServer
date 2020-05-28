@@ -1,0 +1,2 @@
+cd nodejs
+start.bat

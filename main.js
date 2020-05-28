@@ -83,18 +83,6 @@ function removeModule(main_global, event){
         return false
     }
 }
-Array.prototype.insert = function(index, value){
-	if(index < 0) index = this.length + index;
-	if(index > this.length){
-		this[index] = value;
-	}else{
-		for(var i=this.length; i>=index; i--){
-			this[i] = this[i-1];
-			if(i == index) this[i] = value;
-		}
-	}
-	return this.length;
-}
 global.middleware_next = middleware_next;
 global.removeModule = removeModule;
 

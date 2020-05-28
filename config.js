@@ -1,7 +1,7 @@
 var fs = require("fs");
 var path = require("path");
 
-module.exports = config = {
+module.exports = {
 	host: "0.0.0.0",
 	port: process.env.PORT || 8080,
 	https:{
@@ -11,15 +11,19 @@ module.exports = config = {
 		port: 443
 	},
 	// base_url : "/*", //let this be a comment if you don't know what you did
-	web_folder: path.resolve("./web"), // the root folder to being served by server.
-	tmp_folder: path.resolve("./tmp"), // is used to saved junk files such as uploads, 
+	web_folder: path.resolve("../htdocs"), // the root folder to being served by server.
+	tmp_folder: path.resolve("../tmp"), // is used to saved junk files such as uploads, 
 									   // renderer file, log file, etc. temporary
+	// https://www.npmjs.com/package/http-proxy#options
+	http_proxy_opts: {
+		target: "http://localhost:80"
+	},
 	DirectoryViewTemplate: path.resolve("./template/DirectoryView.ejs"),
 	addSlashOnDirectory: true, // if true, it would redirect
 							   // /dir1/dir2 -> /dir1/dir2/
 							   // add more slash at the end of url
 	http_error:{
-		default: path.resolve("./web/error/default.ejs")
+		default: path.resolve("../htdocs/error/default.ejs")
 	},
 	exp_static:{},
 	routes:{
@@ -58,10 +62,8 @@ module.exports = config = {
 		//
 
 		"/404": 404,
-		"/test/api.njs/*": "FILE ./web/test/api.njs",
 		"/*/node_modules": "403",
-		"/*/node_modules/*": "403",
-		"/*/node_modules/*": "403",
+		"/*/node_modules/*": (req,res,next) => {},
 		"/*/package.json": "403",
 		"/*/package-lock.json": "403",
 		"/*/.*": "403"
@@ -74,47 +76,38 @@ module.exports = config = {
 	 * be shown. If it can't find any, it would render a 
 	 * directory.
 	 */
-	index_file: ["index.html", "default.html", "index.ejs"],
-
-	// Please don't remove or add item from these propertises
-	plugins:[],
-	middlewares_use: [],
-	middlewares_all: [],
-	renderer: []
+	index_file: ["index.html", "default.html", "index.ejs", "default.ejs"],
+	plugins:[
+		require("./lib/plugin.localip.js"),
+		require("./lib/router.renderer.js"),
+		require("./lib/plugin.HTTPS.js"),
+		require("./lib/plugin.WSHandler.js").plugin
+	],
+	// All middlewares below is sorted in an order. Please be really carefull to edit those.
+	middlewares_use: [ // here is middleware to set some options to req or res property
+		require("./lib/router.test_response.js").start,
+		require("./lib/router.renderer.js").router_res_renderTo
+		/*                   You could place some plugins here                   */
+	],
+	middlewares_all: [ // here is middleware to do main process
+		require("./lib/router.filepath.js"), // this should be placed first
+		require("./lib/router.reroutes.js"), // this should be placed second from first
+		/*                   You could place some middlewares here                   */
+		require("./lib/router.renderer.js").router, //this should be placed second from last
+		require("./lib/middleware.PostHandler.js").autoDelete,
+		require("./lib/router.HTTPStatusHandler.js"), //this should be placed last
+		require("./lib/router.test_response.js").end
+	],
+	renderer : [ // here is middlewares for rendering process
+		require("./lib/router.reroutes.js").fixRenderer, //this should be placed first
+		require("./lib/renderer.NJSHandler.js"),
+		require("./lib/plugin.WSHandler.js").renderer,
+		/**
+		 * `async` is something awful. so... if you don't know what you did, let it set to false.
+		 * `handlePOST` is to use POST middlewares such as body-parser or multer.
+		 */
+		require("./lib/renderer.EJSRenderer.js")({async:false, handlePOST:true}),
+		/*                     You could place some renderers here                     */
+		require("./lib/renderer.http_proxy.js") //this should be placed last
+	]
 }
-
-config.plugins = [
-	require("./lib/plugin.localip.js"),
-	require("./lib/router.renderer.js"),
-	require("./lib/plugin.HTTPS.js"),
-	require("./lib/plugin.WSHandler.js").plugin
-]
-
-// All middlewares below is sorted in an order. Please be really carefull to edit those.
-config.middlewares_use = [ // here is middleware to set some options to req or res property
-	require("./lib/router.test_response.js").start,
-	require("./lib/router.renderer.js").router_res_renderTo
-	/*                   You could place some plugins here                   */
-]
-config.middlewares_all = [ // here is middleware to do main process
-	require("./lib/router.filepath.js"), // this should be placed first
-	require("./lib/router.reroutes.js"), // this should be placed second from first
-	/*                   You could place some middlewares here                   */
-	require("./lib/router.renderer.js").router, //this should be placed second from last
-	require("./lib/middleware.PostHandler.js").autoDelete,
-	require("./lib/router.HTTPStatusHandler.js"), //this should be placed last
-	require("./lib/router.test_response.js").end
-]
-config.renderer = [ // here is middlewares for rendering process
-	require("./lib/router.reroutes.js"), // this should be placed first
-	require("./lib/renderer.DirectoryPageRenderer.js"), // this should be placed second
-	require("./lib/renderer.NJSHandler.js"),
-	require("./lib/plugin.WSHandler.js").renderer,
-	/**
-	 * `async` is something awful. so... if you don't know what you did, let it set to false.
-	 * `handlePOST` is to use POST middlewares such as body-parser or multer.
-	 */
-	require("./lib/renderer.EJSRenderer.js")({async:false, handlePOST:true}),
-	/*                     You could place some renderers here                     */
-	require("./lib/renderer.SimpleFileResponse.js") //this should be placed last
-]
