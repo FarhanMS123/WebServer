@@ -4,7 +4,7 @@
 
 ![status success](https://img.shields.io/badge/status-success-green)
 
-This is an http server using and extends from express app. The modules included in this app is most uses by many developper and recommended modules from express. I also use `app.engine` to support new extensions. It also support request over https proxy. This app also could be act as proxy server and pass request to another server. This could help you if you have another server to process data. If you activate this in settings, it would disable file response built-in modules. You should modify script below to reenable it manually.
+This is an http server using and extends from express app. The modules included in this app is most uses by many developper and recommended modules from express. I also use `app.engine` to support new extensions. It also support request over https protocol. This app also could be act as proxy server and pass request to another server. This would help you if you have another server to process data. If you activate it in settings, it would disable built-in modules which is handle file response. You should modify script below to reenable it manually.
 
 ## Installation
 
@@ -20,10 +20,22 @@ Second, download modules needed by this app and start app
 > npm install
 > npm start
 ```
-You could face problem while trying to start the script. If you meet the problem, you should setting your app in `main.js`. Ask an issue if you are confused.
+You could face problem while trying to start the script. If you meet the problem, you should setting your app in `main.js`. Read documentation below before begin, and ask an issue if you are confused.
 
 ## Documentation
 > This documentation could be found in the begining of `main.js`.
+
+All settings are registered in express server app using `app.set()` method. This would be easier to use express standard which is supported (and recommended) by express and many developpers out there. By default, I have set http port to `80` and have configurated the https certificate and set port to `443`. But in many linux os are prohibit an unrooted app to listen under 1024. So in this step, you should change the ports to above 1024. You are allowed to ignore `passphrase`, `key`, and `cert`. I have set it for you. But, if you want to use your own certificate, don't forget to modify to put the `key.pem` and `cert.pem` in this app's `ssl` folder and change or remove `passphrase` propertise.
+
+```javascript
+app.set("port", 80); // FOR HTTP
+app.set("https", {
+    passphrase: "YOUR_SSL_PASSPHRASE",
+    key: fs.readFileSync("./ssl/key.pem"),
+    cert: fs.readFileSync("./ssl/cert.pem"),
+    port: 443 // FOR HTTPS
+});
+```
 
 This app uses `express-truepath` to get the file path in system by url requested. It would set `req.filepath` and `req.dirpath` if it is a file. Otherwise, it will set `req.dirpath` if it is a directory. This app also uses `express-reroutes` to redirect to some url or reroute filepath and/or directory that will be used by this app. This feature could help you in setting your own router.
 
