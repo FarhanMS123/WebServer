@@ -25,7 +25,7 @@ You could face problem while trying to start the script. If you meet the problem
 ## Documentation
 > This documentation could be found in the begining of `main.js`.
 
-All settings are registered in express server app using `app.set()` method. This would be easier to use express standard which is supported (and recommended) by express and many developpers out there. By default, I have set http port to `80` and have configurated the https certificate and set port to `443`. But in many linux os are prohibit an unrooted app to listen under 1024. So in this step, you should change the ports to above 1024. You are allowed to ignore `passphrase`, `key`, and `cert`. I have set it for you. But, if you want to use your own certificate, don't forget to modify to put the `key.pem` and `cert.pem` in this app's `ssl` folder and change or remove `passphrase` propertise.
+All settings are registered in express server app using `app.set()` method. This would be easier to use express standard which is supported (and recommended) by express and many developpers out there. By default, I have set http port to `80` and have configurated the https certificate and set port to `443`. But in many linux os are prohibit an unrooted app to listen under 1024. So in this step, you should change the ports to above 1024. You are allowed to ignore `passphrase`, `key`, and `cert`. I have set it for you. But, if you want to use your own certificate, don't forget to put the `key.pem` and `cert.pem` in this app's `ssl` folder and modify or remove `passphrase` propertise.
 
 ```javascript
 app.set("port", 80); // FOR HTTP
