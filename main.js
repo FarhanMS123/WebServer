@@ -54,6 +54,12 @@
  * response an error with http-errors, just do `next(req.createError(http_code));`, you could change 
  * http_code with http_code status or etc.
  * 
+ * If you want to use http-proxy and activate it from settings, it would give app support to http proxy.
+ * Every time all router didn't sent any response and giving back 404 code, it would automatically 
+ * ignore error handler and pass request to another server. This feature would be great if you have another
+ * server to handle any request (works fine with apache server). To do this, you should set `useHTTPProxy`
+ * setting to true, and set the target. Otherwise, setting this app port and another server port.
+ * 
  * req.filepath, req.dirpath, res.redirect(url), res.render(views, opts, cb)
  * res.locals, app.engine(ext, function(engine_path, opts, cb){})
  * next(err)
@@ -90,6 +96,7 @@
  */
 
 var path = require("path");
+var fs = require("fs");
 var url = require("url");
 
 var library = require("./library.js");
@@ -103,6 +110,17 @@ var app = global.app = express();
 // App configuration
 app.set("app", app);
 app.set("port", 80);
+app.set("https", {
+    passphrase: "20200413_WebServer_20200413_By_20200413_FarhanMS123_20200413",
+    key: fs.readFileSync("./ssl/key.pem"),
+    cert: fs.readFileSync("./ssl/cert.pem"),
+    port: 443
+});
+
+app.set("useHTTPProxy", false);
+app.set("http_proxy", {
+    target: "http://localhost:8080"
+});
 
 app.set("web_folder", path.resolve("./web"));
 app.set("index", ["index.html", "default.html", "index.ejs", "default.ejs", "index.aejs", "default.aejs", "index.njs", "default.njs"]);
@@ -126,6 +144,14 @@ app.set("views", path.resolve("./views"));
 app.disable("etag");
 
 // App extension
+var https_server = require("./ssl/index.js")(app.get("https"), app);
+
+var http_proxy, http_proxy_server;
+if(app.get("useHTTPProxy")){
+    http_proxy = require("http-proxy");
+    http_proxy_server = http_proxy.createProxyServer(app.get("http_proxy"));
+}
+
 var PostHandler =  require(path.resolve(global.app.get("router"), "middleware.PostHandler.js"));
 var expressWs = require('express-ws')(app);
 
@@ -154,6 +180,7 @@ app.use(truePath(app.get("web_folder"), {
 app.use(require("express-reroutes")(app.get("reroutes")));
 app.use((req, res, next)=>{
     // register
+    res.PostHandler = PostHandler;
     res.createError = createError;
 
     res._render = res.render;
@@ -194,43 +221,51 @@ app.ws("/*.ws", function(ws, req){
 });
 app.all("/*", function(req,res,next){
     var urlParse = url.parse(req.originalUrl);
-    if(req.filepath){
-        if(req.filepath && app.engines[path.extname(req.filepath)]){
-            res.render(req.filepath, {next}, function(err, html){
-                if(html) res.send(html);
-                if(err) next(err);
-            });
-        }else{
-            var urlParse2 = url.parse(`/${path.basename(req.filepath)}${urlParse.pathname.length > 1 && urlParse.pathname.substr(-1, 1) == "/" ? "/" : ""}${urlParse.search || ""}`);
-            var nReq = Object.assign({}, req, {url: urlParse2.href, path: urlParse2.pathname, originalUrl: urlParse2.href, _parsedUrl: urlParse2});
-            express.static(path.dirname(req.filepath), app.get("static_opts"))(nReq, res, next);
-            console.log({urlParse2, nReq, dirname:path.dirname(req.filepath), filepath:req.filepath});
-        }
+    if(req.filepath && app.engines[path.extname(req.filepath)]){
+        res.render(req.filepath, {next}, function(err, html){
+            if(html) res.send(html);
+            if(err) next(err);
+        });
+    }else if(app.get("useHTTPProxy")){
+        res.status(404);
+        next(createError(404));
+    }else if(req.filepath){
+        var urlParse2 = url.parse(`/${path.basename(req.filepath)}${urlParse.pathname.length > 1 && urlParse.pathname.substr(-1, 1) == "/" ? "/" : ""}${urlParse.search || ""}`);
+        var nReq = Object.assign({}, req, {url: urlParse2.href, path: urlParse2.pathname, originalUrl: urlParse2.href, _parsedUrl: urlParse2});
+        express.static(path.dirname(req.filepath), app.get("static_opts"))(nReq, res, next);
+        console.log({urlParse2, nReq, dirname:path.dirname(req.filepath), filepath:req.filepath});
     }else if(req.dirpath){
         var dirpath = req.path == "/" ? req.dirpath : path.dirname(req.dirpath);
         var urlParse2 = req.path == "/" ? url.parse("/") : url.parse(`/${path.basename(req.dirpath)}${urlParse.pathname.length > 1 && urlParse.pathname.substr(-1, 1) == "/" ? "/" : ""}${urlParse.search || ""}`);
         var nReq = Object.assign({}, req, {url: urlParse2.href, path: urlParse2.pathname, originalUrl: urlParse2.href, _parsedUrl: urlParse2});
         require("serve-index")(dirpath, app.get("index_opts"))(nReq, res, next);
     }else{
+        res.status(404);
         next(createError(404));
     }
 });
 
 app.use(function(req, res, next) {
-    if(!res.sent || !res.writableEnded) res.render(app.get("error_template"), {next}, function (err, html) {
+    if((!res.sent || !res.writableEnded) && !app.get("useHTTPProxy") && res.statusCode != 404) res.render(app.get("error_template"), {next}, function (err, html) {
         if(html) res.send(html);
         if(err) next(err);
     });
+}, function(err, req, res, next) {
+    if((!res.sent || !res.writableEnded) && !app.get("useHTTPProxy") && res.statusCode != 404){
+        res.locals.message = err.message;
+        res.locals.error = err;
+        
+        res.status(err.status || 500);
+        res.render(app.get("error_template"), {next, err}, function (err, html) {
+            if(html) res.send(html);
+            if(err) next(err);
+        });
+    }
 });
-app.use(function(err, req, res, next) {
-    res.locals.message = err.message;
-    res.locals.error = err;
-    
-    res.status(err.status || 500);
-    res.render(app.get("error_template"), {next, err}, function (err, html) {
-        if(html) res.send(html);
-        if(err) next(err);
-    });
+
+app.all("/*", function(req, res, next){
+    if((!res.sent || !res.writableEnded) && app.get("useHTTPProxy")) http_proxy_server.web(req, res);
+    next();
 });
 
 // App listening
