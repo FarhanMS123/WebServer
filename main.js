@@ -201,7 +201,8 @@ app.use((req, res, next)=>{
 });
 
 /**
- * add your routers here
+ * add your routers here.
+ * you could remove this comment if you want.
  */
 
 app.ws("/*.ws", function(ws, req){
@@ -228,7 +229,7 @@ app.ws("/*.ws", function(ws, req){
 });
 app.all("/*", function(req,res,next){
     var urlParse = url.parse(req.originalUrl);
-    if(req.filepath && app.engines[path.extname(req.filepath)]){
+    if(req.filepath && fs.existsSync(req.filepath) && app.engines[path.extname(req.filepath)]){
         res.render(req.filepath, {next}, function(err, html){
             if(html) res.send(html);
             if(err) next(err);
@@ -236,12 +237,12 @@ app.all("/*", function(req,res,next){
     }else if(app.get("useHTTPProxy")){
         res.status(404);
         next(createError(404));
-    }else if(req.filepath){
+    }else if(req.filepath && fs.existsSync(req.filepath)){
         var urlParse2 = url.parse(`/${path.basename(req.filepath)}${urlParse.pathname.length > 1 && urlParse.pathname.substr(-1, 1) == "/" ? "/" : ""}${urlParse.search || ""}`);
         var nReq = Object.assign({}, req, {url: urlParse2.href, path: urlParse2.pathname, originalUrl: urlParse2.href, _parsedUrl: urlParse2});
         express.static(path.dirname(req.filepath), app.get("static_opts"))(nReq, res, next);
         console.log({urlParse2, nReq, dirname:path.dirname(req.filepath), filepath:req.filepath});
-    }else if(req.dirpath){
+    }else if(req.dirpath && fs.existsSync(req.dirpath)){
         var dirpath = req.path == "/" ? req.dirpath : path.dirname(req.dirpath);
         var urlParse2 = req.path == "/" ? url.parse("/") : url.parse(`/${path.basename(req.dirpath)}${urlParse.pathname.length > 1 && urlParse.pathname.substr(-1, 1) == "/" ? "/" : ""}${urlParse.search || ""}`);
         var nReq = Object.assign({}, req, {url: urlParse2.href, path: urlParse2.pathname, originalUrl: urlParse2.href, _parsedUrl: urlParse2});
