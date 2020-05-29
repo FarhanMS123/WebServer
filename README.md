@@ -12,13 +12,15 @@ Before begin, you need `git` and `NodeJS` installing in your system.
 
 First, download this repository and extract it. Or you could using git to clone it.
 ```
-> git clone https://github.com/FarhanMS123/WebServer.git
-> git checkout -b 3.0.0
+$ git clone https://github.com/FarhanMS123/WebServer.git
+$ cd WebServer
+$ git checkout -b 3.0.0
 ```
 Second, download modules needed by this app and start app
 ```
-> npm install
-> npm start
+$ npm install
+$ npm update
+$ npm start
 ```
 You could face problem while trying to start the script. If you meet the problem, you should setting your app in `main.js`. Read documentation below before begin, and ask an issue if you are confused.
 
