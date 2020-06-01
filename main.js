@@ -279,3 +279,5 @@ app.all("/*", function(req, res, next){
 // App listening
 app.set("listen", app.listen(app.get("port")));
 console.log(`Listening on ${app.get("port")}`);
+
+module.exports = app;
