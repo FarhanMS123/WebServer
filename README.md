@@ -8,7 +8,7 @@ This is an http server using and extends from express app. The modules included 
 
 ## Installation
 
-Before begin, you need `git` and `NodeJS` installing in your system.
+Before begin, you need `git` and `NodeJS` installed in your system.
 
 First, download this repository and extract it. Or you could using git to clone it.
 ```
@@ -22,12 +22,28 @@ $ npm install
 $ npm update
 $ npm start
 ```
-You could face problem while trying to start the script. If you meet the problem, you should setting your app in `main.js`. Read documentation below before begin, and ask an issue if you are confused.
+
+You would face problem while trying to start the script. If you meet the problem, you should setting your app in `main.js`. Read documentation below before begin, and ask an issue if you are confused.
 
 ## Documentation
-> This documentation could be found in the begining of `main.js`.
 
-All settings are registered in express server app using `app.set()` method. This would be easier to use express standard which is supported (and recommended) by express and many developpers out there. By default, http port is setted to `80` and have configurated the https certificate with port setted to `443`. However, many linux OSes are prohibit an unrooted app to listen under 1024. So for this step, you should change the ports to above 1024. You could ignore `passphrase`, `key`, and `cert`.   But, if you want to use your own certificate, don't forget to put the `key.pem` and `cert.pem` in this app's `ssl` folder and modify or remove `passphrase` propertise.
+- [x] App Configuration
+    - [x] HTTP
+    - [x] HTTPS
+    - [x] Express setting
+- [x] Proxy Server
+- [x] express-filepath
+- [x] createError
+- [ ] POST Handler
+- [ ] Routers and rewrites rules
+- [ ] Serve Static
+- [ ] Serve Index
+- [ ] APP Engine & Renderer
+    - [ ] EJS
+    - [ ] NJS
+    - [ ] WS
+
+All settings are registered in express server app using `app.set()` method and you could get the value by `app.get()` method. Express also has some settings which you could set, enable, or disable it by method offer (check it in Express documentation). By default, http port is setted to `80` and have configurated the https certificate with port setted to `443`. However, many linux OSes are prohibit an unrooted app to listen under 1024. So, if you havne;t control over root permission, you should change the ports to above 1024. You could ignore `passphrase`, `key`, and `cert`. However, if you want to use your own certificate, don't forget to put the `key.pem` and `cert.pem` in this app's `ssl` folder and modify or remove `passphrase` propertise.
 
 ```javascript
 app.set("port", 80); // FOR HTTP
@@ -37,156 +53,83 @@ app.set("https", {
     cert: fs.readFileSync("./ssl/cert.pem"),
     port: 443 // FOR HTTPS
 });
+
+app.disable("etag");
 ```
 
 See also:
 - [Making your own SSL by hackernoon](https://hackernoon.com/set-up-ssl-in-nodejs-and-express-using-openssl-f2529eab5bb)
+- [Express application setting](http://expressjs.com/en/4x/api.html#app.settings.table)
 
-This app uses `express-truepath` to get the file path in system by url requested. It would set `req.filepath` and `req.dirpath` if it is a file. Otherwise, it will set `req.dirpath` if it is a directory. This app also uses `express-reroutes` to redirect to some url or reroute filepath and/or directory that will be used by this app. This feature could help you in setting your own router. There are some spaces to add your own router. It would make built-in routers and your router(s) haven't conflict and follow standard which have set. It also make you could change the `req.filepath` and `req.dirpath` and pass for next router for rendering it.
+This app has integrated with HTTP Proxy, so in the end of routers, if there are none response, it would pass the request to target server. By default is not active, so this app would handle all request by itself. To turning it on, you should uncomment it's setting. You could disable the `serve-index` and `serve-static` features to make target server handling the file response.
 
 ```javascript
-...
-
-/**
- * add your routers here.
- * you could remove this comment if you want.
- */
-
-app.get("/users/:username/:directory", function(req, res, next){
-    req.filepath = path.resolve("./web", "user.ejs");
-    req.dirpath = path.dirname(req.filepath);
-    next();
+app.set("http_proxy", {
+    target: "http://localhost:8080"
 });
-
-...
 ```
 
-Script above could be done with `express-reroutes` by adding new rule to the `reroutes` setting.
+See also :
+- [`http-proxy` modules](https://www.npmjs.com/package/http-proxy)
+
+This app has **App extensions** flag. It uses to put any library or functions needed by this app. `express-truepath` is the one of them to get the file path in system by url requested. It would set `req.filepath` and `req.dirpath` if it is a file. Otherwise, it will only set `req.dirpath` if it is a directory. It has some propertise that maybe need a little changes, otherwise you could leave it as default.
 
 ```javascript
-app.set("reroutes", {
-    ...
-    "/users/:username/:directory":"FILE ./web/user.ejs"
+app.set("web_folder", path.resolve("./web")); // web folder's path
+app.set("truepath", {
+    // index file that will be find instead serving directory list.
+    index: ["index.html", "default.html", "index.ejs", "default.ejs", "index.aejs", "default.aejs", "index.njs", "default.njs"],  
+    follow_link: true,
+    resolveDirectoryURL: true
+});
+
+// example using router
+app.all("/*", (req, res, next)=>{
+    // it will return this property if it is exist
+    req.filepath // only if it is a file
+    req.dirpath // both if it is file or directory
 });
 ```
 
 See also :
 - [How `express-truepath` works.](https://www.npmjs.com/package/express-truepath)
-- [Writing rules with `express-reroutes`.](https://www.npmjs.com/package/express-reroutes)
-- [Express Router](https://expressjs.com/en/4x/api.html#router)
-- [Middleware callback function examples](http://expressjs.com/en/4x/api.html#middleware-callback-function-examples)
-- [Writing middleware for use in Express apps](http://expressjs.com/en/guide/writing-middleware.html)
 
-This app supports static serving, rendering, and indexing. It uses `serve-static` and `serve-index`. Those has been set to always follow `req.filepath` and `req.dirpath` propertise. Also, it uses express engine to render template file. The data inside, will automatically filled with `{app, req, res, views, render_opts, render_cb}`, only works via `res.render`. Notice that `next` function is not included, you should set it by your self by add `{next}` in render data. By default, we set `{next}` in every built-in routers we have declared. It also included `{_locals, settings}`  which is generated by express it self. And in some engine, we add some features to give more control  in app.
+This app would handle http error via `res.status(http_error)` or `next(err)`. For descripting error, it uses http-errors module. It is defined as `createError(http_error)` and included in `res.createError(http_code)`. To  response an error with http-errors, just do `next(res.createError(http_code));`, you could change `http_code` with http status code or etc. In the end of router, it will render a error file using app engine. It would set `res.locals.message`, `res.locals.error`, `res.statusCode` and pass it to render engine. It has default error views, you can edit or change the view's filepath. You could add another views to handle any http code.
 
-> Use `res.render` instead of `app.render`. 
 ```javascript
-app.engine("extension", function(filepath, data, cb){
-    data = {
-        _locals, settings, // setted by express
-        app, req, res, views, render_opts, render_cb, // defined by this app
-        next, ...other data by render, ...other data by locals // defined by yourself
-    };
-    cb(undefined, 
-    `<pre>${data.date.toString()}\nNo timeline from ${data.label} right now.</pre>
-    <br />
-    <b>Theme type : ${data.type}</b>`);
+app.set("error_template", {
+    default: path.resolve("./web/error/default.ejs")
+    //, 404: path.resolve("./web/error/404.html") // if you have your 404 file, copy, paste this script to main.js, and uncomment it.
 });
 
-app.get("/timeline", (req, res, next)=>{
-    res.locals.date = new Date();
-    res.locals.label = "My Office";
+// example using router
+app.all("/*", (req, res, next)=>{
+    // you could set status code first
+    res.status(404);
+    next();
 
-    res.render("index.extension", {next, type:"default"}, function(err, html){
-        res.send(html);
-    });
+    // or you could use createError
+    next(res.createError(404));
 });
-```
-See also :
-- [Using template engines](https://expressjs.com/en/guide/using-template-engines.html)
-- [Developing template engines for express](https://expressjs.com/en/advanced/developing-template-engines.html)
-- [Template engines](https://expressjs.com/en/resources/template-engines.html)
-- [Working with `consolidate.js`](https://github.com/tj/consolidate.js)
-- [Express API `res.render`](http://expressjs.com/en/4x/api.html#res.render)
-- [Express API `app.engine`](http://expressjs.com/en/4x/api.html#app.engine)
-
-There are some extensions and engines supported, such as ejs, aejs, njs, and ws. EJS is embedded javascript. It would generate HTML markup with plain JavaScript. The data will be filled with opts from renderer. I also added some propertise, these are `{cb, engine_path, require, opts}`. There are two extensions, these are `*.ejs`, and `*.aejs`. `*.ejs` will render synchronous template. `*.aejs` will render asynchronous template. Because of `*.ejs` is synchronous and cannot wait, I  added a POST Handler feature for it. For `*.aejs`, you should handle it by your self.
-
-```html
-<%
-    // some variables available for *.ejs
-    _locals, settings, // setted by express
-    app, req, res, views, render_opts, render_cb, // defined by this app via res.render
-    cb, engine_path, require, opts // defined by this app via engine
-    next, ...other data by render, ...other data by locals // defined by yourself
-%>
-```
-
-This is an example of synchronize ejs via `*.ejs` file type
-```html
-<%
-    // Synchronize ejs support post handler.
-    // So you could handle the POST via res.
-    // Please remind! Always use sync function or you couldn't present the data to users.
-    res.body
-    res.files
-
-    name = req.query["name"] || "world!";
-%>
-Hello, <%- name %>!
-<%- include("./footer.ejs", {date: new Date()}) %>
-```
-
-This is an example of asynchronize ejs via `*.aejs` file type.
-```html
-<%
-    // Synchronize ejs didn't support post handler automatically, so you should import it by your self
-    var path = require("path");
-    var POSTHandler = require(path.resolve(app.get("router"), "middleware.PostHandler.js"));
-    
-    // await function could make script to pause until Promise resolved
-    await new Promise((resolved, rej)=>{ POSTHandler(req, res, resolved) });
-
-    // now you could process it with sync or async functions.
-    res.body
-    res.files
-
-    name = req.query["name"] || "world!";
-%>
-Hello, <%- name %>!
-
-<% /* Notice that `include` need `await` in async ejs */ %>
-<%- await include("./footer.ejs", {date: new Date()}) %>
 ```
 
 See also :
-- [EJS Docs](https://ejs.co/#docs)
+- [HTTP Status Code](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes)
+- [Create Error with `http-errors` module](https://www.npmjs.com/package/http-errors)
 
-There is a new engine I build. It is `*.njs`, stands for nodejs. It just a normal node module, but I set it to be view engine for this app. It should exports a function with 3 arguments, those are `function(engine_path, opts, cb){}`. You have 2 options to response to client. You could render it with html with callback from `cb(err, html);`, or you could response it manually via `opts.res.send(html);`. This file also support routing. You could access it to sub routes of this file. For example, you could access this to web browser : `http://localhost/test/api.njs/myname/human` It will automatically reroute req.filepath to `./web/test/api.njs`
+There is a built-in POST Handler ready to use. It would parse `application/json`, `application/octet-stream`, `text/plain`, `application/x-www-form-urlencoded`, and `multipart/form-data` and put the data in `req.body`. For files upload, it will save temporary to `tmp` directory and setted to `req.files`. You need to set `tmp` directory, otherwise you could leave it as default.
 
-This app also support websocket. You just do it as same as you did to request a file in browser except, you request it from websocket client using `ws://` proxy. The `*.ws` it self is normal node module, It should exports a function with 2 arguments, those are `function(ws, req){}`. I set some propertise, those are `ws.req`, `req.ws`, and `req.app`. If you call this with http, it would return 406 Not Acceptable.
-
-This app would handle http error via `res.status(http_error)` or `next(err)`. For descripting error, it uses http-errors module. It is defined as `createError` and included in `res.createError`. To  response an error with http-errors, just do `next(req.createError(http_code));`, you could change  http_code with http_code status or etc. 
-
-If you want to use http-proxy and activate it from settings, it would give app support to http proxy. Every time all router didn't sent any response and giving back 404 code, it would automatically  ignore error handler and pass request to another server. This feature would be great if you have another server to handle the request (works fine with apache server). To do this, you should set `useHTTPProxy` setting to true, and set the target. Also, don't forget to setting this app port and another server port. NOTICE that if you enable it, this would (also) ignore this app's built-in file handler. You could enable it manually by removing the script 
-
-## Data opts (ignore this)
 ```javascript
-req.filepath, req.dirpath, res.redirect(url), res.render(views, opts, cb)
-res.locals, app.engine(ext, function(engine_path, opts, cb){})
-next(err)
-{app, req, res, views, render_opts, render_cb}
-{next}
-{_locals, settings}
-{cb, engine_path, require, opts}
-function(engine_path, opts, cb){}
-cb(err, html);
-opts.res.send(html);
-function(ws, req){}
-ws.req, req.ws, req.app
-res.status(http_error), createError(), res.createError()
-next(req.createError(http_code));
+app.set("tmp_folder", path.resolve("./tmp"));
+
+// example using express routes
+app.all("/*", require(path.join(app.get("router"))) (req, res, next)=>{});
 ```
+
+# HAVEN'T HAVE REFERENCES
+http://expressjs.com/en/resources/middleware/serve-static.html
+http://expressjs.com/en/resources/middleware/serve-index.html
+http://expressjs.com/en/resources/middleware/morgan.html
 
 ## LICENSE
 
@@ -211,24 +154,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
-## References
-https://hackernoon.com/set-up-ssl-in-nodejs-and-express-using-openssl-f2529eab5bb
-https://expressjs.com/en/4x/api.html#router
-https://www.npmjs.com/package/express-truepath
-https://www.npmjs.com/package/express-reroutes
-http://expressjs.com/en/4x/api.html#middleware-callback-function-examples
-http://expressjs.com/en/guide/writing-middleware.html
-http://expressjs.com/en/4x/api.html#res.render
-http://expressjs.com/en/4x/api.html#app.engine
-http://expressjs.com/en/advanced/developing-template-engines.html
-http://expressjs.com/en/resources/template-engines.html
-https://github.com/tj/consolidate.js
-https://ejs.co/#docs
-https://www.npmjs.com/package/express-ws
-http://expressjs.com/en/resources/middleware/serve-static.html
-http://expressjs.com/en/resources/middleware/serve-index.html
-http://expressjs.com/en/resources/middleware/morgan.html
-https://en.wikipedia.org/wiki/List_of_HTTP_status_codes
-https://www.npmjs.com/package/http-errors
-https://www.npmjs.com/package/http-proxy
