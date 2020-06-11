@@ -12,7 +12,12 @@ var multerMW = false;
 var router = express.Router();
 router.use(bodyParser.json(), bodyParser.raw(), bodyParser.text(), bodyParser.urlencoded({extended: true}));
 
-module.exports = function(req, res, next){
+router.all(multer({
+	dest: path.resolve(global.app.get("tmp_folder"))
+}).any());
+module.exports = router;
+
+/* module.exports = function(req, res, next){
 	//Base Script
 	if(res.finished){next(err); return;}
 
@@ -36,7 +41,7 @@ module.exports = function(req, res, next){
 	}
 	
 	return router(req,res,next);
-}
+} */
 
 module.exports.autoDelete = function(req,res,next){
 	if(req.files) 

@@ -19,6 +19,7 @@
  * Please read README.md before configurating this app.
  * 
  * --------------------------------------------------------------------------------------------
+ * 
  * MIT License
  * 
  * Copyright (c) 2020 Farhan Muhammad Sabran
@@ -40,6 +41,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ * 
  */
 
 var path = require("path");
@@ -74,9 +76,9 @@ app.set("static_opts", {
     etag: false
 });
 
-app.set("tmp_folder", path.resolve("./tmp"));
 app.set("router", path.resolve("./router"));
 app.set("views", path.resolve("./views"));
+app.set("tmp_folder", path.resolve("./tmp"));
 
 app.set("error_template", {
     default: path.resolve("./web/error/default.ejs")
@@ -88,6 +90,8 @@ app.disable("etag");
 var https_server = require("./ssl/index.js")(app.get("https"), app);
 
 var PostHandler =  require(path.resolve(global.app.get("router"), "middleware.PostHandler.js"));
+app.PostHandler = PostHandler;
+
 var createError = require('http-errors');
 var truePath = require("express-truepath");
 
@@ -119,11 +123,15 @@ app.use((req, res, next)=>{
     res.PostHandler = PostHandler;
     res.createError = createError;
 
+    var data = {app, req, res};
+    for(key in data){
+        res.locals[key] = data[key];
+    }
     res._render = res.render;
     res.render = function(views, render_opts, render_cb){
         render_cb = typeof render_opts == "function" ? render_opts : render_cb;
-        render_opts = typeof opts == "function" ? {} : render_opts;
-        res._render(views, Object.assign({app, req, res, views, render_opts, render_cb}, render_opts), render_cb)
+        render_opts = typeof render_opts == "function" ? {} : render_opts;
+        res._render(views, Object.assign({views, render_opts, render_cb}, render_opts), render_cb);
     }
 
     next();
@@ -136,7 +144,7 @@ app.use((req, res, next)=>{
  */
 
 app.use("/*/*.njs/*", (req, res, next)=>{
-    req.filepath = path.join(app.get("web_folder"), req.params[0], req.params[0] + ".njs");
+    req.filepath = path.join(app.get("web_folder"), req.params[0], req.params[1] + ".njs");
     req.dirpath = path.dirname(req.filepath);
 });
 
@@ -169,7 +177,7 @@ app.all("/*", function(req,res,next){
     }else next();
 });
 
-/* // Pass Request to next server
+/* // HTTP PROXY - Pass Request to next server
 app.all("/*", function(req, res, next){
     if(!res.sent || !res.writableEnded) 
         require("http-proxy").createProxyServer({
@@ -178,27 +186,34 @@ app.all("/*", function(req, res, next){
     next();
 }); */
 
+// File Handler
 app.all("/*", function(req,res,next){
     var urlParse = url.parse(req.originalUrl);
-    if(req.filepath && fs.existsSync(req.filepath) && app.engines[path.extname(req.filepath)]){
+    if(res.sent || res.writableEnded){
+        next();
+    }else if(req.filepath && fs.existsSync(req.filepath) && !app.engines[path.extname(req.filepath)]){
         res.render(req.filepath, {next}, function(err, html){
             if(html) res.send(html);
             if(err) next(err);
         });
+
+// serve-static
     }else if(req.filepath && fs.existsSync(req.filepath) && app.get("static_opts") && app.get("static_opts").constructor == Object){
-        var urlParse2 = url.parse(`/${path.basename(req.filepath)}${urlParse.pathname.length > 1 && urlParse.pathname.substr(-1, 1) == "/" ? "/" : ""}${urlParse.search || ""}`);
-        var nReq = Object.assign({}, req, {url: urlParse2.href, path: urlParse2.pathname, originalUrl: urlParse2.href, _parsedUrl: urlParse2});
-        express.static(path.dirname(req.filepath), app.get("static_opts"))(nReq, res, next);
+        // res.sendFile(req.filepath);
+        library.sendFile(req.filepath, app.get("static_opts"))(req, res, next);
+
+/* // serve-index - this feature is disabled due not correctly show path.
     }else if(req.dirpath && fs.existsSync(req.dirpath) && app.get("index_opts") && app.get("index_opts").constructor == Object){
-        var dirpath = req.path == "/" ? req.dirpath : path.dirname(req.dirpath);
-        var urlParse2 = req.path == "/" ? url.parse("/") : url.parse(`/${path.basename(req.dirpath)}${urlParse.pathname.length > 1 && urlParse.pathname.substr(-1, 1) == "/" ? "/" : ""}${urlParse.search || ""}`);
-        var nReq = Object.assign({}, req, {url: urlParse2.href, path: urlParse2.pathname, originalUrl: urlParse2.href, _parsedUrl: urlParse2});
-        require("serve-index")(dirpath, app.get("index_opts"))(nReq, res, next);
+        library.sendDirectory(req.dirpath, app.get("index_opts"))(req, res, next); */
+
     }else{
         res.status(404);
         next(createError(404));
     }
 });
+
+// serve-index - replaced for serve-index feature above
+app.all("/*", require("serve-index")(app.get("web_folder"), app.get("index_opts")));
 
 function errHandler(req, res, next, next2){ // req||err, res||req, next||res, next
     var err;
@@ -212,6 +227,8 @@ function errHandler(req, res, next, next2){ // req||err, res||req, next||res, ne
     }
 
     if((!res.sent || !res.writableEnded)){
+        var error_views = app.get("error_template");
+        error_views = error_views[res.statusCode] || error_views["default"];
         res.render(error_views, {next, err}, function (err, html) {
             if(html) res.send(html);
             if(err) next(err);
