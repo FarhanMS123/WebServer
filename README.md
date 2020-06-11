@@ -51,7 +51,7 @@ You would face problem while trying to start the script. If you meet the problem
     - [ ] morgan
 -->
 
-All settings are registered in express server app using `app.set()` method and you could get the value by `app.get()` method. Express also has some settings which could be setted, enabled, or disabled by method offer (check it in Express documentation). By default, http port is setted to `80` and have configurated the https certificate with port setted to `443`. However, many linux OSes are prohibit an unrooted app to listen under 1024. So, if you havne;t control over root permission, you should change the ports to above 1024. You could ignore `passphrase`, `key`, and `cert`. However, if you want to use your own certificate, don't forget to put the `key.pem` and `cert.pem` in this app's `ssl` folder and modify or remove `passphrase` propertise.
+All settings are registered in express server app using `app.set()` method and you could get the value by `app.get()` method. Express also has some settings which could be setted, enabled, or disabled by method offer (check it in Express documentation). By default, http port is setted to `80` and have configurated the https certificate with port setted to `443`. However, many linux OSes are prohibit an unrooted app to listen under 1024. So, if you haven't control over root permission, you should change the ports to above 1024. You could ignore `passphrase`, `key`, and `cert`. However, if you want to use your own certificate, don't forget to put the `key.pem` and `cert.pem` in this app's `ssl` folder and modify or remove `passphrase` propertise.
 
 ```javascript
 app.set("port", 80); // FOR HTTP
@@ -82,6 +82,8 @@ app.all("/*", function(req, res, next){
 });
 ```
 
+> You may want to disable file handler feature. Don't forget to comment it in the case you will need it in the future.
+
 See also :
 - [`http-proxy` modules](https://www.npmjs.com/package/http-proxy)
 
@@ -107,7 +109,7 @@ app.all("/*", (req, res, next)=>{
 See also :
 - [How `express-truepath` works.](https://www.npmjs.com/package/express-truepath)
 
-This app would handle http error via `res.status(http_error)` or `next(err)`. For descripting error, it uses `http-errors` module. It is defined as `createError(http_error)` and included in `res.createError(http_code)`. To  response an error with `http-errors`, just do `next(res.createError(http_code));`, you could change `http_code` with http status code or etc. In the end of router, it will render a error file using app engine. It would set `res.locals.message`, `res.locals.error`, `res.statusCode` and pass it to render engine. It has default error views, you can edit or change the view's filepath. You could add another views to handle any http code.
+This app would handle http error via `res.status(http_error)` or `next(err)`. For descripting error, it uses `http-errors` module. It is defined as `createError(http_error)` and included in `res.createError(http_code)`. To  response an error with `http-errors`, just do `next(res.createError(http_code));`, you could change `http_code` with http status code or etc. In the end of router, it will render an error file using app engine. It would set `res.locals.message`, `res.locals.error`, `res.statusCode` and pass it to render engine. It has default error views, you can edit or change the view's filepath. You could add another views to handle any http code.
 
 ```javascript
 app.set("error_template", {
@@ -129,8 +131,9 @@ app.all("/*", (req, res, next)=>{
 See also :
 - [HTTP Status Code](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes)
 - [Create Error with `http-errors` module](https://www.npmjs.com/package/http-errors)
+- [Express error handling](https://expressjs.com/en/guide/error-handling.html)
 
-There is a built-in POST Handler ready to use. It would parse `application/json`, `application/octet-stream`, `text/plain`, `application/x-www-form-urlencoded`, and `multipart/form-data` and put the data in `req.body`. For files upload, it will save temporary to `tmp` directory and setted the files list to `req.files`. You need to set `tmp` directory, otherwise you could leave it as default.
+There is a built-in POST Handler ready to use. It would parse `application/json`, `application/octet-stream`, `text/plain`, `application/x-www-form-urlencoded`, and `multipart/form-data` and put the data in `req.body`. For files upload, they will be saved temporary in `tmp` directory and set the files list to `req.files`. You need to set `tmp` directory, otherwise you could leave it as default.
 
 ```javascript
 app.set("tmp_folder", path.resolve("./tmp"));
@@ -160,7 +163,7 @@ See also :
 - [parsing form data with `body-parse` module](https://www.npmjs.com/package/body-parser)
 - [process file upload with `multer` module](https://www.npmjs.com/package/multer)
 
-You could handle and process request with express router. With router, you could write rules such as reroutes, redirect, or block request, making APIs, set filepath or dirpath, or handle POST request (include file upload). Also, you could render a page or send file with specific feature to users. All features above are created to support developper in building the app. 
+You could handle and process request with express router. With router, you could write rules such as reroutes, redirect, or block request, making APIs, set filepath or dirpath, and handle POST request (include file upload). Also, you could render a page or send file with specific feature to users. All features above are created to support developper in building the app. 
 
 ```javascript
 // Only present propertise and functions that introduced in app.
@@ -172,8 +175,8 @@ app.get("port");
 app.get("web_folder");
 app.get("error_template")["default"];
 app.get("router"); // path to router folder
-                   // `router` is a folder to place bunch of router that
-                   // would be used for this app, like routing feature or etc.
+                   // `router` is a folder to place a bunch of router that
+                   // would be used for this app, like routing feature, or etc.
 app.get("views"); // path to views folder. this would be used by express engine.
                   // From express documentation, `views` is " A directory or an 
                   // array of directories for the application's views. If an array, 
@@ -230,6 +233,22 @@ app.all("/apis/*", (req, res, next)=>{
 app.all("/apis/v2/*", require(path.join(app.get("web_folder"), "apis.v2.js")));
 ```
 
+and in router/apis.v2.js
+```javascript
+// you export as functions
+module.exports = function(req, res, next){
+    res.send(JSON.stringify({hello: "world!"}));
+}
+
+// or you could export it as router
+var router = require("express").Router();
+router.all("/*", function(req, res, next){
+   res.send(JSON.stringify({hello: "world!"}));
+});
+
+module.exports = router;
+```
+
 > read express documentation for more functions that would you need.
 
 See also :
@@ -238,7 +257,7 @@ See also :
 - [Middleware callback function examples](http://expressjs.com/en/4x/api.html#middleware-callback-function-examples)
 - [Writing middleware for use in Express apps](http://expressjs.com/en/guide/writing-middleware.html)
 
-This app is using `serve-static` and `serve-index` to handle file request and render folder listing. These would follow filepath from `req.filepath` in **File Handler** router and have implemented in library as `sendFile` and `sendDirectory`. Unfortunately, `sendDirectory` is disabled due wrong in showing directory's path in page. It has replaced with **serve-static** router which is next from File Handler router and not following `req.dirpath` propertise. Settings is available to control `serve-static` and `serve-index`.
+This app is using `serve-static` and `serve-index` to handle file request and render folder listing. These would follow filepath from `req.filepath` in **File Handler** router and have implemented in library as `sendFile` and `sendDirectory`. Unfortunately, `sendDirectory` is disabled due wrong in showing directory's path in rendered page. It has replaced with **serve-static** router which is next from File Handler router and not following `req.dirpath` propertise. Settings is available to control `serve-static` and `serve-index`.
 
 ```javascript
 app.set("index_opts", {});
@@ -247,15 +266,21 @@ app.set("static_opts", {
 });
 ```
 
+> `serve-static` would took `app.get("web_folder")` as the root and follow the url to indexing folder.
+
 See also :
 - [Serve static files with `serve-static`](http://expressjs.com/en/resources/middleware/serve-static.html)
 - [Render directory listings using `serve-index`](http://expressjs.com/en/resources/middleware/serve-index.html)
 
-Express has render engine feature to render views. You also could add data to renderer to make it really dynamic. The data inside will automatically filled with `{app, req, res, views, render_opts, render_cb}`, only works via `res.render`. Notice that `next` function is not included, you should set it by your self by add `{next}` in render data. By default, we set `{next}` in every built-in routers we have declared. It also included `{_locals, settings}`  which is generated by express it self. And in some engine, we add some features to give more control in app.
+Express has renderer engine feature to render views. You could also add data to renderer to make it really dynamic. The data inside will automatically filled with `{app, req, res, views, render_opts, render_cb}`, only works via `res.render`. Notice that `next` function is not included, you should set it by your self by add `{next}` in render data. By default, we set `{next}` in every built-in routers we have declared. It also included `{_locals, settings}`  which is generated by express it self. And in some engine, we add some features to give more control in app. While you try rendering a file without dirpath (only filename), it will take a file from `views` folder. You would setting the `views` directory or leave it as default. 
 
 > Use `res.render` instead of `app.render`. 
 
 ```javascript
+// App configuration
+app.set("views", path.resolve("./views"));
+
+// App engine
 app.engine("extension", function(filepath, data, cb){
     data = {
         _locals, settings, // setted by express
@@ -268,6 +293,7 @@ app.engine("extension", function(filepath, data, cb){
     <b>Theme type : ${data.type}</b>`);
 });
 
+// App routing
 app.get("/timeline", (req, res, next)=>{
     res.locals.date = new Date();
     res.locals.label = "My Office";
@@ -285,9 +311,9 @@ See also :
 - [Express API `res.render`](http://expressjs.com/en/4x/api.html#res.render)
 - [Express API `app.engine`](http://expressjs.com/en/4x/api.html#app.engine)
 
-There are some extensions and engines supported, such as ejs, aejs, njs, and ws. EJS is embedded javascript. It would generate HTML markup with plain JavaScript. The data will be filled with opts from renderer. I also added some propertise, these are `{cb, engine_path, require, opts}`. There are two extensions, these are `*.ejs`, and `*.aejs`. `*.ejs` will render synchronous template. `*.aejs` will render asynchronous template. Because of `*.ejs` is synchronous and cannot wait, I  added a POST Handler feature for it. For `*.aejs`, you should handle it by your self.
+There are some build-in engines supported, such as ejs, aejs, njs, and ws. EJS is embedded javascript. It would generate HTML markup with plain JavaScript. The data will be filled with opts from renderer. I also added some propertise, these are `{cb, engine_path, require, opts}`. There are two extensions, these are `*.ejs`, and `*.aejs`. `*.ejs` will render synchronous template. `*.aejs` will render asynchronous template. Because of `*.ejs` is synchronous and cannot wait, I  added a POST Handler feature for it. For `*.aejs`, you should handle POST by your self.
 
-```html
+```php
 <%
     // some variables available for *.ejs
     _locals, settings, // setted by express
@@ -298,7 +324,7 @@ There are some extensions and engines supported, such as ejs, aejs, njs, and ws.
 ```
 
 This is an example of synchronize ejs via `*.ejs` file type
-```html
+```php
 <%
     // Synchronize ejs support post handler.
     // So you could handle the POST via res.
@@ -313,7 +339,7 @@ Hello, <%- name %>!
 ```
 
 This is an example of asynchronize ejs via `*.aejs` file type.
-```html
+```php
 <%
     // Asynchronize ejs didn't support post handler automatically, so you should import it by your self
     var path = require("path");
@@ -341,7 +367,7 @@ See also :
 - [Handle multipart boundary POST with `multer`](http://expressjs.com/en/resources/middleware/multer.html)
 - [Handle POST with `body-parse`](http://expressjs.com/en/resources/middleware/body-parser.html)
 
-There is a new engine introduced. It is `*.njs`, stands for nodejs. It just a normal node module modified to be view engine in this app. It should exports a function with 3 arguments, those are `function(engine_path, opts, cb){}`. You have two ways to response to client. You could render it with html via callback from `cb(err, html);`, or you could response it manually via `opts.res.send(html);`. This file also support routing. You could access it to sub routes of this file. For example, you could access this from web browser : `http://localhost/test/api.njs/myname/human` It will automatically reroute req.filepath to `./web/test/api.njs`
+There is a new engine introduced. It is `*.njs`, stands for nodejs. It just a normal node module modified to be view engine for this app. It should exports a function with 3 arguments, those are `function(engine_path, opts, cb){}`. You have two ways to response to client. You could render it with html via callback from `cb(err, html);`, or you could response it manually via `opts.res.send(html);`. This file also support routing. You could access it to sub routes of this file. For example, you could access this from web browser : `http://localhost/test/api.njs/myname/human` It will automatically reroute req.filepath to `./web/test/api.njs`
 
 This is an example code for `*.njs`.
 ```javascript
@@ -356,6 +382,8 @@ module.exports = function(engine_path, opts, cb){
     cb(undefined, "<h1>Hello world!</h1>");
 }
 ```
+
+> Use `cb` instead `opts.res.send` and `opts.next`
 
 This app also support websocket. You would did it as same as you did to request a file in browser, except you have request it from websocket client using `ws://` proxy. The `*.ws` it self is normal node module, It should exports a function with 2 arguments, those are `function(ws, req){}`. I set some propertise, those are `ws.req`, `req.ws`, and `req.app`. If you call this with http, it would return `406 Not Acceptable`.
 
