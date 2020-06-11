@@ -4,7 +4,7 @@
 
 ![status success](https://img.shields.io/badge/status-success-green)
 
-This is an http server using and extends from express app. The modules included in this app is most uses by many developper and recommended modules from express. I also use `app.engine` to support new extensions. It also support request over https protocol. This app also could be act as proxy server and pass request to another server. This would help you if you have another server to process data. If you activate it in settings, it would disable built-in modules which is handle file response. You should modify script below to reenable it manually.
+This is an http server using and extends from express app. The modules included in this app is most used by many developper and recommended modules from express. I also use `app.engine` to support new extensions. It also support request over https protocol. This app also could be act as proxy server and pass request to another server. This would help you if you have another server to process data. It has disabled by default and you should uncomment the script to enable it manually.
 
 ## Installation
 
@@ -23,7 +23,7 @@ $ npm update
 $ npm start
 ```
 
-You would face problem while trying to start the script. If you meet the problem, you should setting your app in `main.js`. Read documentation below before begin, and ask an issue if you are confused.
+You would face problem while trying to start the script. If it already occurred, you should setting your app in `main.js`. Read documentation below before begin, and ask an issue if you are confused.
 
 ## Documentation
 
@@ -61,8 +61,6 @@ app.set("https", {
     cert: fs.readFileSync("./ssl/cert.pem"),
     port: 443 // FOR HTTPS
 });
-
-app.disable("etag");
 ```
 
 See also:
@@ -82,12 +80,12 @@ app.all("/*", function(req, res, next){
 });
 ```
 
-> You may want to disable file handler feature. Don't forget to comment it in the case you will need it in the future.
+> You may want to disable file handler feature. Don't forget to comment it in the case you need it in the future.
 
 See also :
 - [`http-proxy` modules](https://www.npmjs.com/package/http-proxy)
 
-This app has **App extensions** flag. It uses to put any library or functions needed by this app. `express-truepath` is the one of them to get the file path in system by url requested. It would set `req.filepath` and `req.dirpath` if it is a file. Otherwise, it will only set `req.dirpath` if it is a directory. It has some propertise that maybe need a little changes, otherwise you could leave it as default.
+This app has **App extensions** flag. It uses to put any library or functions needed by this app. `express-truepath` is the one to get file path in system by url requested. It would set `req.filepath` and `req.dirpath` if it is a file. Otherwise, it will only set `req.dirpath` if it is a directory. It has some propertise that maybe need a little changes, otherwise you could leave it as default.
 
 ```javascript
 app.set("web_folder", path.resolve("./web")); // web folder's path
@@ -264,6 +262,7 @@ app.set("index_opts", {});
 app.set("static_opts", {
     etag: false
 });
+app.disable("etag");
 ```
 
 > `serve-static` would took `app.get("web_folder")` as the root and follow the url to indexing folder.
