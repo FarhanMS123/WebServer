@@ -27,6 +27,7 @@ You would face problem while trying to start the script. If you meet the problem
 
 ## Documentation
 
+<!--
 - [x] App Configuration
     - [x] HTTP
     - [x] HTTPS
@@ -47,9 +48,10 @@ You would face problem while trying to start the script. If you meet the problem
         - [ ] library.removeModule
         - [ ] library.sendFile
         - [ ] library.sendDirectory
-    - [ ] morgan 
+    - [ ] morgan
+-->
 
-All settings are registered in express server app using `app.set()` method and you could get the value by `app.get()` method. Express also has some settings which you could set, enable, or disable it by method offer (check it in Express documentation). By default, http port is setted to `80` and have configurated the https certificate with port setted to `443`. However, many linux OSes are prohibit an unrooted app to listen under 1024. So, if you havne;t control over root permission, you should change the ports to above 1024. You could ignore `passphrase`, `key`, and `cert`. However, if you want to use your own certificate, don't forget to put the `key.pem` and `cert.pem` in this app's `ssl` folder and modify or remove `passphrase` propertise.
+All settings are registered in express server app using `app.set()` method and you could get the value by `app.get()` method. Express also has some settings which could be setted, enabled, or disabled by method offer (check it in Express documentation). By default, http port is setted to `80` and have configurated the https certificate with port setted to `443`. However, many linux OSes are prohibit an unrooted app to listen under 1024. So, if you havne;t control over root permission, you should change the ports to above 1024. You could ignore `passphrase`, `key`, and `cert`. However, if you want to use your own certificate, don't forget to put the `key.pem` and `cert.pem` in this app's `ssl` folder and modify or remove `passphrase` propertise.
 
 ```javascript
 app.set("port", 80); // FOR HTTP
