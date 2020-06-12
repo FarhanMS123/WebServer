@@ -12,12 +12,12 @@ var multerMW = false;
 var router = express.Router();
 router.use(bodyParser.json(), bodyParser.raw(), bodyParser.text(), bodyParser.urlencoded({extended: true}));
 
-router.all(multer({
+/* router.all(multer({
 	dest: path.resolve(global.app.get("tmp_folder"))
-}).any());
+}).any()); */
 module.exports = router;
 
-/* module.exports = function(req, res, next){
+module.exports = function(req, res, next){
 	//Base Script
 	if(res.finished){next(err); return;}
 
@@ -29,9 +29,14 @@ module.exports = router;
 		function fileHandler(req,res,next){
 			for(file_index in req.files){
 				file = req.files[file_index];
-				file.autoDelete = true;
+				// file.autoDelete = true;
+				// auto remove in 60 seconds
+				file.timer = setTimeout(function(){
+					fs.unlinkSync(file.path);
+				}, 600);
 				file.rename = function rename(newname){
-					file.autoDelete = false;
+					// file.autoDelete = false;
+					clearTimeout(file.timer);
 					return fs.renameSync(file.path, newname);
 				};
 			}
@@ -41,18 +46,18 @@ module.exports = router;
 	}
 	
 	return router(req,res,next);
-} */
+}
 
-module.exports.autoDelete = function(req,res,next){
+/* module.exports.autoDelete = function(req,res,next){
 	if(req.files) 
 		for(file_index in req.files){
 			file = req.files[file_index];
 			if(file.autoDelete) fs.unlinkSync(file.path)
 		};
 	next();
-}
+} */
 
-//this is just a template
+/* //this is just a template
 function multerEngine(opts){
 	var getDestination = opt.destination || function(req, file, cb){cb(null, "/dev/null")};
 
@@ -68,4 +73,4 @@ function multerEngine(opts){
 			fs.unlink(file.path, cb);
 		}
 	}
-}
+} */

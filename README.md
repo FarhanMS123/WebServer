@@ -141,7 +141,7 @@ See also :
 
 ### POST Handler
 
-There is a built-in POST Handler ready to use. It would parse `application/json`, `application/octet-stream`, `text/plain`, `application/x-www-form-urlencoded`, and `multipart/form-data` and put the data in `req.body`. For files upload, they will be saved temporary in `tmp` directory and set the files list to `req.files`. You need to set `tmp` directory, otherwise you could leave it as default.
+There is a built-in POST Handler ready to use. It would parse `application/json`, `application/octet-stream`, `text/plain`, `application/x-www-form-urlencoded`, and `multipart/form-data` and put the data in `req.body`. For files upload, they will be saved temporary in `tmp` directory and set the files list to `req.files`. The files saved in temporary folder that never handled will auto removed in 60 seconds. You need to set `tmp` directory, otherwise you could leave it as default.
 
 ```javascript
 app.set("tmp_folder", path.resolve("./tmp"));
@@ -155,6 +155,13 @@ res.PostHandler
 // example using express routes
 app.all("/*", PostHandler, (req, res, next)=>{
     // process your post here.
+
+    // for processing file.
+    // files information could you found in `multer` documentation
+    // req.files is an array, so check it by index or forEach
+    req.files[index].timer // this is timer for remover (will active in 60 seconds)
+    req.files[index].rename(target_path); // we have set `rename` function to move files to another placed.
+                                          // it will auto stop timer and handle process by it self.
 });
 
 // or you could use like this
@@ -165,7 +172,7 @@ app.all("/*", async (req, res, next)=>{
 });
 ```
 
-> If you make your own POST Handler (especially upload handler), save the file(s) in the `tmp_folder` and make sure it would remove automatically. Files which is uploaded without rechecked could be dangerous and used as injector by attacker.
+> If you make your own POST Handler (especially upload handler), save the file(s) in the `tmp_folder` and make sure it would remove automatically. Files which is uploaded without rechecked could be dangerous and become backdoors for attacker.
 
 See also :
 - [parsing form data with `body-parse` module](https://www.npmjs.com/package/body-parser)
