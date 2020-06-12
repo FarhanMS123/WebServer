@@ -36,6 +36,7 @@ You would face problem while trying to start the script. If it already occurred,
 - [x] express-filepath
 - [x] createError
 - [x] POST Handler
+- [x] morgan
 - [x] Routers and rewrites rules
 - [x] Serve Static
 - [x] Serve Index
@@ -43,13 +44,14 @@ You would face problem while trying to start the script. If it already occurred,
     - [x] EJS
     - [x] NJS
     - [x] WS
-- [ ] Extra script
+- [x] Extra script
     - [x] library
         - [x] library.removeModule
         - [x] library.sendFile
         - [x] library.sendDirectory
-    - [ ] morgan
 -->
+
+### App configuration
 
 All settings are registered in express server app using `app.set()` method and you could get the value by `app.get()` method. Express also has some settings which could be setted, enabled, or disabled by method offer (check it in Express documentation). By default, http port is setted to `80` and have configurated the https certificate with port setted to `443`. However, many linux OSes are prohibit an unrooted app to listen under 1024. So, if you haven't control over root permission, you should change the ports to above 1024. You could ignore `passphrase`, `key`, and `cert`. However, if you want to use your own certificate, don't forget to put the `key.pem` and `cert.pem` in this app's `ssl` folder and modify or remove `passphrase` propertise.
 
@@ -66,6 +68,8 @@ app.set("https", {
 See also:
 - [Making your own SSL by hackernoon](https://hackernoon.com/set-up-ssl-in-nodejs-and-express-using-openssl-f2529eab5bb)
 - [Express application setting](http://expressjs.com/en/4x/api.html#app.settings.table)
+
+### Proxy Server
 
 You could use `http-proxy` to make this app act as a proxy server and pass request to another server. This feature would be used for **rewrites rules** feature. This feature is placed before file response feature and disabled by default. To activate it, uncomment the script. You could use this feature to make another server handle file request.
 
@@ -84,6 +88,8 @@ app.all("/*", function(req, res, next){
 
 See also :
 - [`http-proxy` modules](https://www.npmjs.com/package/http-proxy)
+
+### Filepath Parser
 
 This app has **App extensions** flag. It uses to put any library or functions needed by this app. `express-truepath` is the one to get file path in system by url requested. It would set `req.filepath` and `req.dirpath` if it is a file. Otherwise, it will only set `req.dirpath` if it is a directory. It has some propertise that maybe need a little changes, otherwise you could leave it as default.
 
@@ -106,6 +112,8 @@ app.all("/*", (req, res, next)=>{
 
 See also :
 - [How `express-truepath` works.](https://www.npmjs.com/package/express-truepath)
+
+### Throwing Error
 
 This app would handle http error via `res.status(http_error)` or `next(err)`. For descripting error, it uses `http-errors` module. It is defined as `createError(http_error)` and included in `res.createError(http_code)`. To  response an error with `http-errors`, just do `next(res.createError(http_code));`, you could change `http_code` with http status code or etc. In the end of router, it will render an error file using app engine. It would set `res.locals.message`, `res.locals.error`, `res.statusCode` and pass it to render engine. It has default error views, you can edit or change the view's filepath. You could add another views to handle any http code.
 
@@ -130,6 +138,8 @@ See also :
 - [HTTP Status Code](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes)
 - [Create Error with `http-errors` module](https://www.npmjs.com/package/http-errors)
 - [Express error handling](https://expressjs.com/en/guide/error-handling.html)
+
+### POST Handler
 
 There is a built-in POST Handler ready to use. It would parse `application/json`, `application/octet-stream`, `text/plain`, `application/x-www-form-urlencoded`, and `multipart/form-data` and put the data in `req.body`. For files upload, they will be saved temporary in `tmp` directory and set the files list to `req.files`. You need to set `tmp` directory, otherwise you could leave it as default.
 
@@ -161,6 +171,8 @@ See also :
 - [parsing form data with `body-parse` module](https://www.npmjs.com/package/body-parser)
 - [process file upload with `multer` module](https://www.npmjs.com/package/multer)
 
+### Request Logger
+
 Every request will be log by `morgan`. This router is putted at the first router. You may change its behavior with setting in it's documentation.
 
 ```javascript
@@ -169,6 +181,8 @@ app.use(require('morgan')("dev"));
 
 See also :
 - [morgan](http://expressjs.com/en/resources/middleware/morgan.html)
+
+### Routers and Rewriting Rules
 
 You could handle and process request with express router. With router, you could write rules such as reroutes, redirect, or block request, making APIs, set filepath or dirpath, and handle POST request (include file upload). Also, you could render a page or send file with specific feature to users. All features above are created to support developper in building the app. 
 
@@ -264,6 +278,8 @@ See also :
 - [Middleware callback function examples](http://expressjs.com/en/4x/api.html#middleware-callback-function-examples)
 - [Writing middleware for use in Express apps](http://expressjs.com/en/guide/writing-middleware.html)
 
+### File and Directory Serving
+
 This app is using `serve-static` and `serve-index` to handle file request and render folder listing. These would follow filepath from `req.filepath` in **File Handler** router and have implemented in library as `sendFile` and `sendDirectory`. Unfortunately, `sendDirectory` is disabled due wrong in showing directory's path in rendered page. It has replaced with **serve-static** router which is next from File Handler router and not following `req.dirpath` propertise. Settings is available to control `serve-static` and `serve-index`.
 
 ```javascript
@@ -279,6 +295,8 @@ app.disable("etag");
 See also :
 - [Serve static files with `serve-static`](http://expressjs.com/en/resources/middleware/serve-static.html)
 - [Render directory listings using `serve-index`](http://expressjs.com/en/resources/middleware/serve-index.html)
+
+### App Engine
 
 Express has renderer engine feature to render views. You could also add data to renderer to make it really dynamic. The data inside will automatically filled with `{app, req, res, views, render_opts, render_cb}`, only works via `res.render`. Notice that `next` function is not included, you should set it by your self by add `{next}` in render data. By default, we set `{next}` in every built-in routers we have declared. It also included `{_locals, settings}`  which is generated by express it self. And in some engine, we add some features to give more control in app. While you try rendering a file without dirpath (only filename), it will take a file from `views` folder. You would setting the `views` directory or leave it as default. 
 
@@ -318,6 +336,8 @@ See also :
 - [Working with `consolidate.js`](https://github.com/tj/consolidate.js)
 - [Express API `res.render`](http://expressjs.com/en/4x/api.html#res.render)
 - [Express API `app.engine`](http://expressjs.com/en/4x/api.html#app.engine)
+
+### EJS Support
 
 There are some build-in engines supported, such as ejs, aejs, njs, and ws. EJS is embedded javascript. It would generate HTML markup with plain JavaScript. The data will be filled with opts from renderer. I also added some propertise, these are `{cb, engine_path, require, opts}`. There are two extensions, these are `*.ejs`, and `*.aejs`. `*.ejs` will render synchronous template. `*.aejs` will render asynchronous template. Because of `*.ejs` is synchronous and cannot wait, I  added a POST Handler feature for it. For `*.aejs`, you should handle POST by your self.
 
@@ -375,6 +395,8 @@ See also :
 - [Handle multipart boundary POST with `multer`](http://expressjs.com/en/resources/middleware/multer.html)
 - [Handle POST with `body-parse`](http://expressjs.com/en/resources/middleware/body-parser.html)
 
+### NJS Support
+
 There is a new engine introduced. It is `*.njs`, stands for nodejs. It just a normal node module modified to be view engine for this app. It should exports a function with 3 arguments, those are `function(engine_path, opts, cb){}`. You have two ways to response to client. You could render it with html via callback from `cb(err, html);`, or you could response it manually via `opts.res.send(html);`. This file also support routing. You could access it to sub routes of this file. For example, you could access this from web browser : `http://localhost/test/api.njs/myname/human` It will automatically reroute req.filepath to `./web/test/api.njs`
 
 This is an example code for `*.njs`.
@@ -393,6 +415,8 @@ module.exports = function(engine_path, opts, cb){
 
 > Use `cb` instead `opts.res.send` and `opts.next`
 
+### WebSocket Support
+
 This app also support websocket. You would did it as same as you did to request a file in browser, except you have request it from websocket client using `ws://` proxy. The `*.ws` it self is normal node module, It should exports a function with 2 arguments, those are `function(ws, req){}`. I set some propertise, those are `ws.req`, `req.ws`, and `req.app`. If you call this with http, it would return `406 Not Acceptable`.
 
 Example of `echo.ws`
@@ -407,6 +431,8 @@ module.exports = function(ws, req){
 See also :
 - [Using websocket in express using `express-ws`](https://www.npmjs.com/package/express-ws)
 - [Handle websocket connection documentation](https://github.com/websockets/ws/blob/HEAD/doc/ws.md#event-connection)
+
+### Extra Libraries
 
 There are some extra libraries to support main app. It is not recommended to be used by you, so you should find legacy modules in [npm](https://npmjs.com). This app has `removeModule` to delete module which is called by `require()`. So, while you edit the script and re-require it, nodejs will assume it is a new module. There are two arguments provide by this function, there are `removeModule(module_name [, includeSubmodule=false])`. `module_name` is the module that you import, you could set it as module's name or filepath of the module. `includeSubmodule` is optional arguments, which is tell the function to remove all submodules that has called by that module, default is `false`.
 
