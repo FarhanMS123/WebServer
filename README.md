@@ -44,10 +44,10 @@ You would face problem while trying to start the script. If it already occurred,
     - [x] NJS
     - [x] WS
 - [ ] Extra script
-    - [ ] library
-        - [ ] library.removeModule
-        - [ ] library.sendFile
-        - [ ] library.sendDirectory
+    - [x] library
+        - [x] library.removeModule
+        - [x] library.sendFile
+        - [x] library.sendDirectory
     - [ ] morgan
 -->
 
@@ -160,6 +160,15 @@ app.all("/*", async (req, res, next)=>{
 See also :
 - [parsing form data with `body-parse` module](https://www.npmjs.com/package/body-parser)
 - [process file upload with `multer` module](https://www.npmjs.com/package/multer)
+
+Every request will be log by `morgan`. This router is putted at the first router. You may change its behavior with setting in it's documentation.
+
+```javascript
+app.use(require('morgan')("dev"));
+```
+
+See also :
+- [morgan](http://expressjs.com/en/resources/middleware/morgan.html)
 
 You could handle and process request with express router. With router, you could write rules such as reroutes, redirect, or block request, making APIs, set filepath or dirpath, and handle POST request (include file upload). Also, you could render a page or send file with specific feature to users. All features above are created to support developper in building the app. 
 
@@ -399,8 +408,48 @@ See also :
 - [Using websocket in express using `express-ws`](https://www.npmjs.com/package/express-ws)
 - [Handle websocket connection documentation](https://github.com/websockets/ws/blob/HEAD/doc/ws.md#event-connection)
 
-# HAVEN'T HAVE REFERENCES
-http://expressjs.com/en/resources/middleware/morgan.html
+There are some extra libraries to support main app. It is not recommended to be used by you, so you should find legacy modules in [npm](https://npmjs.com). This app has `removeModule` to delete module which is called by `require()`. So, while you edit the script and re-require it, nodejs will assume it is a new module. There are two arguments provide by this function, there are `removeModule(module_name [, includeSubmodule=false])`. `module_name` is the module that you import, you could set it as module's name or filepath of the module. `includeSubmodule` is optional arguments, which is tell the function to remove all submodules that has called by that module, default is `false`.
+
+```javascript
+var removeModule = global.app.library.removeModule = app.library.removeModule //you could use one of these way
+        = require(path.join(process.mainModule.path, "./library.js")).removeModule;
+
+require("./example.njs");            // import a script,
+                                     // then edit the script,
+require("./example.njs");            // while you re-import it, it will be same as the old code. (not changed),
+removeModule("./example.njs");       // so you should remove it first,
+require("./example.njs");            // now the code changes, but the sub modules is not,
+removeModule("./example.njs", true); // so you should add `true` to remove the sub modules too,
+require("./example.njs");            // now the code and the sub modules are changed.
+```
+
+This app has `sendFile` and `sendDirectory` function to render and give file to user. They are implemented from `serve-static` and `serve-index` to support their setting. You aren't supposed to use this instead use `req.filepath` or `res.sendFile`. Their settings are have been explain in a part above. So, this documenation would only give how to use it.
+
+```javascript
+// requiring library module has been explain in a script above
+library.sendFile(filepath, serve_static_opts)(req, res, next);
+library.sendDirectory(dirpath, serve_index_opts)(req, res, next);
+
+// PLEASE DON'T USE THE SCRIPT ABOVE BY YOUR SELF
+// express has a function same as above, you should do this
+
+// sending file
+res.sendFile(filepath);
+
+res.type("text/html");
+res.send(fs.readFileSync(filepath, "utf8"));
+
+var mimeTypes = require("mime-types"); // you need install `mime-types` first
+res.set("Content-Type", mimeTypes.lookup(filepath));
+res.send(fs.readFileSync(filepath, "utf8"));
+
+// sending directory list
+// you could make your directory listing views
+// put it in the views folder, and call it by `res.render()`
+res.render("indexing.ejs", {url_path, dir_path}, (err, html)=>{
+    res.send(html);
+});
+```
 
 ## LICENSE
 

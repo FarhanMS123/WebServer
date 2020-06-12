@@ -87,6 +87,8 @@ app.set("error_template", {
 app.disable("etag");
 
 // App extensions
+app.library = library
+
 var https_server = require("./ssl/index.js")(app.get("https"), app);
 
 var PostHandler =  require(path.resolve(global.app.get("router"), "middleware.PostHandler.js"));
