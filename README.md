@@ -76,7 +76,7 @@ You could use `http-proxy` to make this app act as a proxy server and pass reque
 ```javascript
 // HTTP PROXY - Pass Request to next server
 app.all("/*", function(req, res, next){
-    if(!res.sent || !res.writableEnded) 
+    if( (!res.sent || !res.writableEnded) && !(req.filepath && fs.existsSync(req.filepath) && app.engines[path.extname(req.filepath).toLowerCase()]) ) 
         require("http-proxy").createProxyServer({
             // this is an example to pass request to an apache server in the same host.
             // reminds to change server's port from 80 to 8080 () for http request and 443 to 8443 for https request.

@@ -115,11 +115,7 @@ app.engine("njs", (engine_path, opts, cb)=>{library.removeModule(engine_path); r
 
 // App routing
 app.use(require('morgan')("dev"));
-app.use(truePath(app.get("web_folder"), {
-    index: app.get("index"), 
-    follow_link: app.get("follow_symlink"),
-    resolveDirectoryURL: app.get("resolveDirectoryURL")
-}));
+app.use(truePath(app.get("web_folder"), app.get("truepath")));
 app.use((req, res, next)=>{
     // registering functions for next handler
     res.PostHandler = PostHandler;
@@ -183,7 +179,7 @@ app.all("/*", function(req,res,next){
 
 /* // HTTP PROXY - Pass Request to next server
 app.all("/*", function(req, res, next){
-    if(!res.sent || !res.writableEnded) 
+    if( (!res.sent || !res.writableEnded) && !(req.filepath && fs.existsSync(req.filepath) && app.engines[path.extname(req.filepath).toLowerCase()]) ) 
         require("http-proxy").createProxyServer({
             // this is an example to pass request to an apache server in the same host.
             // reminds to change server's port from 80 to 8080 () for http request and 443 to 8443 for https request.
@@ -197,7 +193,7 @@ app.all("/*", function(req,res,next){
     var urlParse = url.parse(req.originalUrl);
     if(res.sent || res.writableEnded){
         next();
-    }else if(req.filepath && fs.existsSync(req.filepath) && !app.engines[path.extname(req.filepath)]){
+    }else if(req.filepath && fs.existsSync(req.filepath) && app.engines[path.extname(req.filepath).toLowerCase()]){
         res.render(req.filepath, {next}, function(err, html){
             if(html) res.send(html);
             if(err) next(err);
@@ -207,11 +203,13 @@ app.all("/*", function(req,res,next){
     }else if(req.filepath && fs.existsSync(req.filepath) && app.get("static_opts") && app.get("static_opts").constructor == Object){
         // res.sendFile(req.filepath);
         library.sendFile(req.filepath, app.get("static_opts"))(req, res, next);
+
+// serve-index
     }else if(req.dirpath && fs.existsSync(req.dirpath) && app.get("index_opts") && app.get("index_opts").constructor == Object){
-        // serve-index - this feature is disabled due not correctly show path.
+        // this feature is disabled due not correctly show path.
         // library.sendDirectory(req.dirpath, app.get("index_opts"))(req, res, next);
 
-        // serve-index - replaced for serve-index feature above
+        // replaced for serve-index feature above
         require("serve-index")(app.get("web_folder"), app.get("index_opts"))(req, res, next);
     }else{
         res.status(404);
