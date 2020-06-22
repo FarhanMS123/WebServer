@@ -132,8 +132,6 @@ app.use((req, res, next)=>{
         res._render(views, Object.assign({views, render_opts, render_cb}, render_opts), render_cb);
     }
 
-    console.log({req, res});
-
     next();
 });
 
