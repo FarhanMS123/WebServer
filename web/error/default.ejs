@@ -3,7 +3,7 @@
 	var path = require('path');
 
 	//var fp = req.renderer ? req.renderer : req.filepath;
-	var fsm = path.join(path.dirname(renderpath), "statusMessages.json");
+	var fsm = path.join(path.dirname(engine_path), "statusMessages.json");
 
 	var sm, msg;
 	if(fs.existsSync(fsm)){
@@ -22,7 +22,7 @@
 
 <html>
     <head>
-		<title><%=res.statusCode%> <%=msg%> HTTP Response</title>
+		<title><%=res.statusCode%> <%=msg%> - HTTP Response</title>
 		<meta http-equiv='X-UA-Compatible' content='IE=edge'>
  		<meta name='viewport' content='width=device-width, initial-scale=1'>
 	</head>
