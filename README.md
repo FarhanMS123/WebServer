@@ -71,14 +71,16 @@ See also:
 
 ### Proxy Server
 
-You could use `http-proxy` to make this app act as a proxy server and pass request to another server. This feature would be used for **rewrites rules** feature. This feature is placed before file response feature and disabled by default. To activate it, uncomment the script. You could use this feature to make another server handle file request.
+You could use `http-proxy` to make this app act as a proxy server and pass request to another server. This would be usefull if you have microservice and wants to use **rewrites rules** feature. This feature is placed before file response feature and disabled by default. To activate it, uncomment the script. You could use this feature to make another server handle file request.
 
 ```javascript
 // HTTP PROXY - Pass Request to next server
 app.all("/*", function(req, res, next){
     if(!res.sent || !res.writableEnded) 
         require("http-proxy").createProxyServer({
-            target: "http://localhost:8080"
+            // this is an example to pass request to an apache server in the same host.
+            // reminds to change server's port from 80 to 8080 () for http request and 443 to 8443 for https request.
+            target: req.connection.encrypted ? "https://localhost:8443" : "http://localhost:8080"
         }).web(req, res);
     next();
 });
@@ -88,6 +90,7 @@ app.all("/*", function(req, res, next){
 
 See also :
 - [`http-proxy` modules](https://www.npmjs.com/package/http-proxy)
+- [checking if request in https connection](https://stackoverflow.com/questions/10348906/how-to-know-if-a-request-is-http-or-https-in-node-js)
 
 ### Filepath Parser
 

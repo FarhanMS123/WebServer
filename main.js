@@ -136,6 +136,8 @@ app.use((req, res, next)=>{
         res._render(views, Object.assign({views, render_opts, render_cb}, render_opts), render_cb);
     }
 
+    console.log({req, res});
+
     next();
 });
 
@@ -183,7 +185,9 @@ app.all("/*", function(req,res,next){
 app.all("/*", function(req, res, next){
     if(!res.sent || !res.writableEnded) 
         require("http-proxy").createProxyServer({
-            target: "http://localhost:8080"
+            // this is an example to pass request to an apache server in the same host.
+            // reminds to change server's port from 80 to 8080 () for http request and 443 to 8443 for https request.
+            target: req.connection.encrypted ? "https://localhost:8443" : "http://localhost:8080"
         }).web(req, res);
     next();
 }); */
@@ -203,19 +207,17 @@ app.all("/*", function(req,res,next){
     }else if(req.filepath && fs.existsSync(req.filepath) && app.get("static_opts") && app.get("static_opts").constructor == Object){
         // res.sendFile(req.filepath);
         library.sendFile(req.filepath, app.get("static_opts"))(req, res, next);
-
-/* // serve-index - this feature is disabled due not correctly show path.
     }else if(req.dirpath && fs.existsSync(req.dirpath) && app.get("index_opts") && app.get("index_opts").constructor == Object){
-        library.sendDirectory(req.dirpath, app.get("index_opts"))(req, res, next); */
+        // serve-index - this feature is disabled due not correctly show path.
+        // library.sendDirectory(req.dirpath, app.get("index_opts"))(req, res, next);
 
+        // serve-index - replaced for serve-index feature above
+        require("serve-index")(app.get("web_folder"), app.get("index_opts"))(req, res, next);
     }else{
         res.status(404);
         next(createError(404));
     }
 });
-
-// serve-index - replaced for serve-index feature above
-app.all("/*", require("serve-index")(app.get("web_folder"), app.get("index_opts")));
 
 function errHandler(req, res, next, next2){ // req||err, res||req, next||res, next
     var err;
