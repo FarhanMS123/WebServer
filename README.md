@@ -4,7 +4,7 @@
 
 ![status success](https://img.shields.io/badge/status-success-green)
 
-> Use [NESTJS](https://nestjs.com/) or [KeyStone JS](https://www.keystonejs.com/).
+> Use [NESTJS](https://nestjs.com/) or [KeyStone JS](https://www.keystonejs.com/) instead. This project is deprecated.
 
 This is an http server using and extends from express app. The modules included in this app is most used by many developper and recommended modules from express. I also use `app.engine` to support new extensions. It also support request over https protocol. This app also could be act as proxy server and pass request to another server. This would help you if you have another server to process data. It has disabled by default and you should uncomment the script to enable it manually.
 
